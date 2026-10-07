@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Контакты и Входящие: сортировка и классификация — BiziBox</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #eff6ff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --blue-bg: #eff6ff;
+    --gray-bg: #f1f5f9;
+    --gray: #64748b;
+    --spam-bg: #f4f4f5;
+    --spam-border: #a1a1aa;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --amber-bg: #fffbeb;
+    --amber: #d97706;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    line-height: 1.6;
+    background: #f8fafc;
+    padding: 24px 16px;
+  }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 48px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  }
+
+  h1 { font-size: 28px; margin: 0 0 8px; }
+  h2 {
+    font-size: 20px;
+    margin: 40px 0 8px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--primary);
+    display: inline-block;
+  }
+  h3 { font-size: 16px; margin: 24px 0 8px; color: var(--primary); }
+
+  p { margin: 8px 0; }
+  .lead { color: var(--muted); font-size: 15px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 20px;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--primary-light); color: var(--primary); font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) td { background: #fafbfc; }
+
+  /* ==== Диаграммы ==== */
+  .dgm {
+    margin: 18px 0 26px;
+    padding: 20px;
+    background: var(--primary-light);
+    border: 1px dashed var(--primary);
+    border-radius: 12px;
+    overflow-x: auto;
+  }
+  .dgm-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--primary);
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .flow-row, .flow-col {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .flow-col { flex-direction: column; }
+  .center { justify-content: center; }
+  .wrap-nodes { flex-wrap: wrap; }
+
+  .nd {
+    background: #fff;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 90px;
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(37,99,235,.12);
+  }
+  .nd.small { font-size: 13px; padding: 8px 12px; min-width: 70px; }
+  .nd.sub { background: var(--primary-light); border-width: 1.5px; }
+  .nd.green { border-color: var(--green); }
+  .nd.green-bg { background: var(--green-bg); border-color: var(--green); }
+  .nd.gray { border-color: var(--gray); color: var(--gray); background: var(--gray-bg); }
+  .nd.spam { border-color: var(--spam-border); background: var(--spam-bg); color: var(--gray); }
+  .nd.red { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+  .nd.amber { border-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
+
+  .arr { font-size: 20px; color: var(--primary); font-weight: 700; line-height: 1; user-select: none; }
+  .arr.down { transform: rotate(90deg); display: inline-block; }
+  .branch-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 1px 8px;
+    white-space: nowrap;
+  }
+
+  .roms {
+    display: flex;
+    align-items: stretch;
+    gap: 18px;
+  }
+  .roms .flow-col { min-width: 0; }
+  .rom-title { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 8px; text-align: center; }
+  .swim {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    min-height: 150px;
+    justify-content: flex-start;
+  }
+  .pill-list { font-size: 13px; text-align: left; }
+  .pill-list li { margin: 4px 0; }
+  .spacer { flex: 1; }
+
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  code {
+    background: var(--gray-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 13px;
+    font-family: "Cascadia Code", Consolas, monospace;
+    color: #0f172a;
+  }
+  b { font-weight: 600; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 720px) {
+    .wrap { padding: 24px 18px; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Контакты и Входящие: сортировка и классификация</h1>
+  <p class="lead">Разбор того, как устроены списки в разделах <b>Входящие</b> и <b>Контакты</b>: какие есть режимы сортировки, как раскладываются контакты по сферам и папкам и как это работает под капотом.</p>
+
+  <h2>1. Базовые термины классификации</h2>
+  <p>Вся система крутится вокруг <b>контакта</b>. У каждого контакта есть набор признаков, по которым его можно отсортировать и разложить по полочкам:</p>
+
+  <table>
+    <thead>
+      <tr><th>Признак</th><th>Что это</th><th>Где видно</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><b>Сфера</b> (<code>life_sphere</code>)</td><td>Главный уровень: <b>Личное</b>, <b>Работа</b>, <b>Спам</b></td><td>Вкладки во Входящих и сайдбар в Контактах</td></tr>
+      <tr><td><b>Папка</b> (<code>folder</code>)</td><td>Папки внутри сферы, с подпапками, у каждой свой цвет</td><td>Сайдбар в Контактах, фильтр над списком во Входящих</td></tr>
+      <tr><td><b>Избранное</b> (<code>is_favorite</code>)</td><td>Звёздочка — важный контакт</td><td>Вкладка «Избранное», фильтр в Контактах</td></tr>
+      <tr><td><b>Новый</b> (<code>is_known=false</code>)</td><td>Контакт ещё «не подтверждён»</td><td>Вкладка «Новое» во Входящих, подраздел «Новые» в Контактах</td></tr>
+      <tr><td><b>Канал</b></td><td>Telegram / Email (или оба)</td><td>Фильтры «Все / Telegram / Email»</td></tr>
+      <tr><td><b>Непрочитанные</b></td><td>Есть входящие, на которые не ответили</td><td>Бейджи-счётчики, сортировка «Непрочитанные»</td></tr>
+    </tbody>
+  </table>
+
+  <p>Важно: <b>сфера и папка связаны жёстко</b> — папка не может «жить» в чужой сфере. Сервер не даст положить контакт в папку «Работа», если у него сфера «Личное».</p>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 1. Признаки контакта</div>
+    <div class="flow-row wrap-nodes center">
+      <div class="nd">Контакт</div>
+      <div class="arr">→</div>
+      <div class="nd green sub">Сфера</div>
+      <div class="arr">→</div>
+      <div class="nd green sub">Папка с подпапками</div>
+      <div class="arr">→</div>
+      <div class="nd gray sub">Избранное</div>
+      <div class="arr">→</div>
+      <div class="nd gray sub">Новый / известный</div>
+      <div class="arr">→</div>
+      <div class="nd gray sub">Канал TG / Email</div>
+      <div class="arr">→</div>
+      <div class="nd gray sub">Непрочитанные</div>
+    </div>
+    <p style="margin:14px 0 0;text-align:center">Ветвление сфер:</p>
+    <div class="flow-row center" style="margin-top:8px">
+      <div class="nd green sub">Личное</div>
+      <div class="arr">+</div>
+      <div class="nd green sub">Работа</div>
+      <div class="arr">+</div>
+      <div class="nd spam">Спам</div>
+    </div>
+  </div>
+
+  <h2>2. Входящие (Inbox)</h2>
+
+  <h3>2.1 Как строится список</h3>
+  <p>Список — это <b>диалоги (threads)</b>, а не сообщения подряд: на каждого контакта берётся <b>одно последнее сообщение</b> + количество непрочитанных. Сервер делает это одним запросом, группируя сообщения по контакту. По умолчанию список упорядочен по дате последнего сообщения. <b>Спам-контакты в общий список не попадают</b> — они видны только во вкладке «Спам».</p>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 2. Из сообщений — в диалоги</div>
+    <div class="flow-row wrap-nodes center">
+      <div class="nd">Сообщения в базе</div>
+      <div class="arr">→</div>
+      <div class="nd sub">Группируем по контакту</div>
+      <div class="arr">→</div>
+      <div class="nd sub">Берём последнее сообщение</div>
+    </div>
+    <div class="flow-row center" style="margin-top:10px">
+      <div class="flow-col">
+        <div class="nd gray">Проверяем сферу</div>
+        <div class="spacer"></div>
+      </div>
+      <div class="arr">→</div>
+      <div class="flow-col">
+        <span class="branch-label">Да — спам</span>
+        <div class="nd spam">Лента «Спам»</div>
+      </div>
+      <div class="arr">→</div>
+      <div class="flow-col">
+        <span class="branch-label">Нет</span>
+        <div class="nd green-bg">Общий список диалогов</div>
+        <div class="nd small sub">+ счётчик непрочитанных</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>2.2 Сортировка (2 режима)</h3>
+  <p>Переключение — кнопки в верхней панели списка. Сортировка выполняется <b>на клиенте</b>, мгновенно, без запроса к серверу.</p>
+
+  <table>
+    <thead><tr><th>Режим</th><th>Правило</th></tr></thead>
+    <tbody>
+      <tr><td><b>По дате</b></td><td>Диалоги от свежих к старым, по времени последнего сообщения</td></tr>
+      <tr><td><b>Непрочитанные</b></td><td>Сначала все диалоги с непрочитанными, затем остальные; внутри каждой группы — по дате</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 3. Сортировка списка диалогов</div>
+    <div class="flow-row wrap-nodes center">
+      <div class="nd">Полный список</div>
+      <div class="arr">→</div>
+      <div class="nd sub">Фильтруем: вкладка, канал, папка, поиск</div>
+      <div class="arr">→</div>
+      <div class="nd sub">Режим сортировки</div>
+    </div>
+    <div class="flow-row center" style="margin-top:10px">
+      <div class="flow-col">
+        <span class="branch-label">По дате</span>
+        <div class="nd small">created_at по убыванию</div>
+      </div>
+      <div class="arr">→</div>
+      <div class="flow-col">
+        <span class="branch-label">Непрочитанные</span>
+        <div class="nd small">Сначала unreadCount &gt; 0, внутри — по дате</div>
+      </div>
+      <div class="arr">→</div>
+      <div class="nd green-bg">Что показываем</div>
+    </div>
+  </div>
+
+  <h3>2.3 Фильтрация (что показываем)</h3>
+  <p>Кнопка сортировки решает <b>порядок</b>, а вкладки и фильтры — <b>что показывать</b>:</p>
+  <ol>
+    <li><b>Вкладки</b>: Все / Избранное / Новое / Личное / Работа / Спам. Избранное — только звёздочки; Новое — только с непрочитанными; Личное/Работа — только по своей сфере (спам отсекается); Спам — отдельная лента. Порядок вкладок можно <b>перетаскивать</b>, он сохраняется в браузере.</li>
+    <li><b>Фильтр по каналу</b>: Все / Telegram / Email.</li>
+    <li><b>Папки</b> (во вкладках Личное/Работа) — только контакты этой папки, с цветной точкой и счётчиком.</li>
+    <li><b>Поиск</b> — по имени и тексту сообщений; список пересобирается и группируется по контактам.</li>
+  </ol>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 4. Вкладки и фильтры Входящих</div>
+    <div class="flow-row wrap-nodes center">
+      <div class="nd sub">Все</div>
+      <div class="nd sub amber">Избранное</div>
+      <div class="nd sub green">Новое</div>
+      <div class="nd sub">Личное</div>
+      <div class="nd sub">Работа</div>
+      <div class="nd spam">Спам</div>
+    </div>
+    <div class="arr down" style="display:block;text-align:center;margin:6px 0">↓</div>
+    <div class="flow-row wrap-nodes center">
+      <div class="nd small gray">Канал: Все / TG / Email</div>
+      <div class="nd small gray">Папки (в Личном / Работе)</div>
+      <div class="nd small gray">Поиск</div>
+    </div>
+    <div class="arr down" style="display:block;text-align:center;margin:6px 0">↓</div>
+    <div class="flow-row center"><div class="nd green-bg">Список диалогов</div><div class="arr">→</div><div class="nd spam">Спам — отдельная лента</div></div>
+  </div>
+
+  <h3>2.4 Массовая классификация из Входящих</h3>
+  <p>В панели над списком можно отметить несколько диалогов галочками и:</p>
+  <ul>
+    <li><b>«Прочитано»</b> — снять непрочитанные со всех сразу;</li>
+    <li><b>«Классифицировать…»</b> — разом разложить выбранные контакты по сферам и папкам (в выпадающем списке дерево: <b>сфера → папка → подпапка</b>).</li>
+  </ul>
+  <p>Это один запрос к серверу, который массово проставляет <code>life_sphere</code> и <code>folder_id</code>.</p>
+
+  <h2>3. Контакты (Contacts)</h2>
+
+  <h3>3.1 Сортировка (6 режимов + направление)</h3>
+  <p>Выпадающий список «По имени» + кнопка ↑/↓. Сортировка выполняется <b>на сервере, в SQL</b>.</p>
+
+  <table>
+    <thead><tr><th>Режим</th><th>Как работает</th></tr></thead>
+    <tbody>
+      <tr><td><b>По имени</b></td><td>Обычный порядок по имени, по умолчанию А→Я</td></tr>
+      <tr><td><b>По дате создания</b></td><td>Порядок по <code>created_at</code></td></tr>
+      <tr><td><b>По сообщениям</b></td><td>Подсчёт числа сообщений на контакт, сортировка по числу</td></tr>
+      <tr><td><b>По последнему сообщению</b></td><td>Максимальная дата сообщения; контакты без сообщений — как 1970, всегда внизу</td></tr>
+      <tr><td><b>По первому сообщению</b></td><td>То же самое, но по самой ранней дате</td></tr>
+      <tr><td><b>По задачам</b></td><td>Сортировка по количеству задач у контакта</td></tr>
+    </tbody>
+  </table>
+
+  <p>Правило при переключении: при выборе <b>нового</b> критерия направление по умолчанию «по убыванию» (самые «большие» сверху), исключение — «По имени» (всегда по возрастанию). Повторный клик по тому же критерию переворачивает порядок. Список грузится порциями по 20, кнопка <b>«Загрузить ещё»</b> достраивает список.</p>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 5. Сортировка контактов в SQL</div>
+    <div class="flow-col center">
+      <div class="nd">SQL-запрос к контактам</div>
+      <div class="arr down">↓</div>
+      <div class="flow-row wrap-nodes center">
+        <div class="nd small sub">name</div>
+        <div class="nd small sub">created_at</div>
+        <div class="nd small sub">message_count</div>
+        <div class="nd small sub">last_activity</div>
+        <div class="nd small sub">first_message</div>
+        <div class="nd small sub">has_tasks</div>
+      </div>
+      <div class="arr down">↓</div>
+      <div class="flow-row wrap-nodes center">
+        <div class="nd small green">asc ↑ — меньшие</div>
+        <div class="nd small green">desc ↓ — большие</div>
+      </div>
+      <div class="arr down">↓</div>
+      <div class="nd amber">Страницы по 20 + «Загрузить ещё»</div>
+    </div>
+  </div>
+
+  <h3>3.2 Классификация: сайдбар слева</h3>
+  <p>Слева — дерево фильтров, которое одновременно служит способом классифицировать:</p>
+  <ul>
+    <li><b>Все контакты</b> — без фильтров (спам включается).</li>
+    <li><b>Избранное</b> — звёздочки.</li>
+    <li><b>Сферы</b>: Личное / Работа / Спам; при выборе сферы раскрываются её папки.</li>
+    <li><b>Папки и подпапки</b> — у каждой свой цвет, вложенность показывается отступом.</li>
+  </ul>
+  <p>Прямо из этого окна работает классификация <b>drag&amp;drop</b>: берёшь контакт из списка и перетаскиваешь на папку — контакту проставляется папка.</p>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 6. Сайдбар Контактов и верхняя панель</div>
+    <div class="roms">
+      <div class="flow-col spacer">
+        <div class="rom-title">Сайдбар</div>
+        <div class="swim">
+          <div class="nd small sub">Все контакты</div>
+          <div class="nd small amber">Избранное</div>
+          <div class="nd small green">Личное</div>
+          <div class="flow-row" style="gap:6px">
+            <div class="nd small" style="min-width:112px">Папка A</div>
+            <div class="arr">↳</div>
+            <div class="nd small" style="min-width:112px">Подпапка A.1</div>
+          </div>
+          <div class="nd small green">Работа</div>
+          <div class="nd small" style="min-width:112px">Папка B</div>
+          <div class="nd small" style="min-width:112px">Папка C</div>
+          <div class="nd spam">Спам</div>
+        </div>
+      </div>
+      <div class="flow-col spacer">
+        <div class="rom-title">Верхняя панель</div>
+        <div class="swim">
+          <div class="nd small sub">Подраздел: Все / Новые</div>
+          <div class="nd small gray">Канал: Все / TG / Email</div>
+          <div class="nd small gray">Поиск: имя, телефон, email, текст</div>
+          <div class="nd small sub">Типы контактов (шаблоны)</div>
+          <div class="nd small gray">Список + сортировка + «Загрузить ещё»</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>3.3 Дополнительные фильтры в шапке</h3>
+  <ul>
+    <li><b>Все / Новые</b> — «Новые» = контакты с <code>is_known = false</code>.</li>
+    <li><b>Канал</b> — все / Telegram / Email.</li>
+    <li><b>Поиск</b> — по имени, телефону, email и даже по тексту сообщений контакта.</li>
+    <li>Отдельная «вторая ось» — <b>типы контактов</b> (шаблоны: личный, рабочий, сервис и т.п.); фильтра по ним в текущем UI списка нет.</li>
+  </ul>
+
+  <h2>4. Автоматическая классификация (без участия человека)</h2>
+  <ul>
+    <li><b>Новый контакт</b>: при первом входящем создаётся с <code>is_known = false</code> — попадает в «Новое». После первого ответа становится «известным».</li>
+    <li><b>Спам-контакт</b>: входящие от него <b>не записываются</b> в обычный поток — сервер пропускает сообщение. Раздел «Спам» позволяет принудительно загрузить диалог.</li>
+    <li><b>Перенос в спам и обратно</b>: при переводе в спам запоминается предыдущая сфера (<code>previous_life_sphere</code>). При «разспаме» контакт возвращается в неё, а не остаётся без сферы. Папка при этом сбрасывается.</li>
+    <li><b>Блокировка</b>: заблокированный контакт молча пропускается при загрузке новых сообщений.</li>
+  </ul>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 7. Жизненный цикл контакта</div>
+    <div class="flow-col center">
+      <div class="nd gray">Первое входящее сообщение</div>
+      <div class="arr down">↓</div>
+      <div class="nd green">Новый (is_known = false)</div>
+      <div class="flow-row center" style="gap:14px">
+        <div class="flow-col">
+          <span class="branch-label">ответили контакту</span>
+          <div class="arr">↓</div>
+          <div class="nd">Известный</div>
+        </div>
+        <div class="flow-col">
+          <span class="branch-label">пометили</span>
+          <div class="arr">↓</div>
+          <div class="nd red">Спам (сфера + previous_life_sphere)</div>
+        </div>
+        <div class="flow-col">
+          <span class="branch-label">удалили и</span>
+          <div class="arr">↓</div>
+          <div class="nd gray">Заблокированный — сообщения пропускаются</div>
+        </div>
+      </div>
+      <div class="flow-row center" style="gap:14px;margin-top:8px">
+        <div class="flow-col">
+          <span class="branch-label">вернули из спама</span>
+          <div class="nd small green-bg">→ возврат в прошлую сферу</div>
+        </div>
+        <div class="flow-col">
+          <span class="branch-label">разблокировали</span>
+          <div class="nd small green-bg">→ Известный снова</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>5. Разница в двух словах</h2>
+  <table>
+    <thead><tr><th></th><th>Входящие</th><th>Контакты</th></tr></thead>
+    <tbody>
+      <tr><td><b>Сортировка</b></td><td>2 режима, на клиенте</td><td>6 режимов + ↑/↓, в SQL на сервере</td></tr>
+      <tr><td><b>Классификация</b></td><td>Вкладки + каналы + папки + массовая</td><td>Сайдбар + drag&amp;drop + типы контактов</td></tr>
+      <tr><td><b>Спам</b></td><td>Скрыт из общего списка, живёт в «Спам»</td><td>Отдельная сфера, не мешается</td></tr>
+      <tr><td><b>Пагинация</b></td><td>Нет (один запрос)</td><td>Да, по 20 с «Загрузить ещё»</td></tr>
+    </tbody>
+  </table>
+
+</div>
+</body>
+</html>

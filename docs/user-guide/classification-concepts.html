@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Классификация и сортировка: предложения по улучшению — BiziBox</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #eff6ff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --gray: #64748b;
+    --gray-bg: #f1f5f9;
+    --spam-bg: #f4f4f5;
+    --spam-border: #a1a1aa;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --amber: #d97706;
+    --amber-bg: #fffbeb;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    line-height: 1.6;
+    background: #f8fafc;
+    padding: 24px 16px;
+  }
+
+  .wrap { max-width: 1000px; margin: 0 auto; background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 40px 48px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+
+  h1 { font-size: 28px; margin: 0 0 8px; }
+  h2 { font-size: 20px; margin: 44px 0 8px; padding-bottom: 6px; border-bottom: 2px solid var(--primary); display: inline-block; }
+  h3 { font-size: 16px; margin: 24px 0 8px; color: var(--primary); }
+  p { margin: 8px 0; }
+  .lead { color: var(--muted); font-size: 15px; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 8px; padding: 14px; background: var(--gray-bg); border-radius: 12px; }
+  .toc a { font-size: 13px; text-decoration: none; color: var(--primary); background: #fff; border: 1px solid var(--border); padding: 4px 10px; border-radius: 999px; }
+  .toc a:hover { border-color: var(--primary); }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 14px; }
+  th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+  tr:nth-child(even) td { background: #fafbfc; }
+
+  /* ==== Диаграммы ==== */
+  .dgm { margin: 18px 0 26px; padding: 20px; background: var(--primary-light); border: 1px dashed var(--primary); border-radius: 12px; overflow-x: auto; }
+  .dgm-title { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--primary); font-weight: 700; margin-bottom: 14px; }
+  .dgm.alert { background: #fef2f2; border-color: var(--red); }
+  .dgm.alert .dgm-title { color: var(--red); }
+  .dgm.goal { background: var(--green-bg); border-color: var(--green); }
+  .dgm.goal .dgm-title { color: var(--green); }
+
+  .flow-row, .flow-col { display: flex; align-items: center; gap: 10px; }
+  .flow-col { flex-direction: column; }
+  .center { justify-content: center; }
+  .wrap-nodes { flex-wrap: wrap; }
+  .spacer { flex: 1; }
+
+  .nd { background: #fff; border: 2px solid var(--primary); border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; text-align: center; min-width: 90px; box-shadow: 0 1px 2px rgba(37,99,235,.12); }
+  .nd.small { font-size: 13px; padding: 8px 12px; min-width: 70px; }
+  .nd.sub { background: var(--primary-light); border-width: 1.5px; }
+  .nd.green { border-color: var(--green); }
+  .nd.green-bg { background: var(--green-bg); border-color: var(--green); }
+  .nd.gray { border-color: var(--gray); color: var(--gray); background: var(--gray-bg); }
+  .nd.spam { border-color: var(--spam-border); background: var(--spam-bg); color: var(--gray); }
+  .nd.red { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+  .nd.amber { border-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
+
+  .arr { font-size: 20px; color: var(--primary); font-weight: 700; line-height: 1; user-select: none; }
+  .arr.down { transform: rotate(90deg); display: inline-block; }
+  .branch-label { font-size: 12px; color: var(--muted); font-weight: 500; background: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1px solid; }
+  .badge.personal { color: var(--green); border-color: var(--green); background: var(--green-bg); }
+  .badge.work { color: var(--primary); border-color: var(--primary); background: var(--primary-light); }
+  .badge.spam { color: var(--gray); border-color: var(--spam-border); background: var(--spam-bg); }
+  .badge.new { color: var(--amber); border-color: var(--amber); background: var(--amber-bg); }
+  .warn { color: var(--red); font-weight: 600; }
+  .ok { color: var(--green); font-weight: 600; }
+
+  /* Venn */
+  .venn { position: relative; width: 100%; max-width: 560px; height: 300px; margin: 10px auto; }
+  .venn .c { position: absolute; width: 280px; height: 280px; border-radius: 50%; border: 3px solid; top: 10px; }
+  .venn .c-a { left: 30px; border-color: var(--green); background: rgba(22,163,74,.10); }
+  .venn .c-b { left: 250px; border-color: var(--primary); background: rgba(37,99,235,.10); }
+  .venn .lbl { position: absolute; font-size: 14px; font-weight: 700; }
+  .venn .lbl-a { left: 20px; top: 14px; color: var(--green); }
+  .venn .lbl-b { right: 18px; top: 14px; color: var(--primary); }
+  .venn .lbl-ab { left: 50%; transform: translateX(-50%); bottom: 16px; text-align: center; color: var(--text); }
+  .venn .lbl-spot { left: 105px; top: 180px; }
+  .venn .lbl-spot2 { left: 335px; top: 180px; }
+
+  /* Timeline */
+  .tl { display: flex; align-items: stretch; gap: 0; margin: 14px 0; overflow-x: auto; }
+  .tl-node { background: #fff; border: 2px solid var(--primary); border-radius: 10px; padding: 12px 14px; min-width: 190px; font-size: 13px; }
+  .tl-node.done { border-color: var(--green); }
+  .tl-node:nth-child(odd) .tl-node { }
+  .tl-arr { display: flex; align-items: center; padding: 0 6px; color: var(--primary); font-weight: 700; font-size: 18px; }
+  .tl-caption { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+  /* Score bars */
+  .score-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; font-size: 13px; }
+  .score-key { width: 210px; text-align: right; flex-shrink: 0; }
+  .score-track { flex: 1; background: #eef2f7; border-radius: 999px; height: 16px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 999px; background: var(--primary); }
+  .score-val { width: 60px; font-weight: 700; color: var(--muted); }
+
+  .file-map { font-size: 13px; }
+  .file-map .row { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--border); align-items: center; }
+  .file-map .head { background: var(--primary-light); font-weight: 700; color: var(--primary); }
+  .file-map code { background: var(--gray-bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 12px; font-family: Consolas, monospace; }
+
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  code { background: var(--gray-bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 13px; font-family: "Cascadia Code", Consolas, monospace; color: #0f172a; }
+  b { font-weight: 600; }
+  .foot { margin-top: 30px; padding-top: 14px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 720px) {
+    .wrap { padding: 24px 18px; }
+    .score-key { width: 150px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Классификация и сортировка: предложения по улучшению</h1>
+  <p class="lead">Концепт-документ: как развить модель контактов и входящих. Базовая идея — «Новое» становится статусом на уровне сфер, а «Личное/Работа» перестают быть взаимоисключающими и превращаются в метки одной карточки.</p>
+
+  <div class="toc">
+    <a href="#now">1. Как сейчас</a>
+    <a href="#target">2. Целевая модель</a>
+    <a href="#venn">3. Вкладки: содержит метку</a>
+    <a href="#life">4. Жизненный цикл</a>
+    <a href="#example">5. Пример: семья → заказчики</a>
+    <a href="#v-a">6. Вариант A</a>
+    <a href="#v-b">7. Вариант B</a>
+    <a href="#v-c">8. Вариант C</a>
+    <a href="#v-d">9. Вариант D</a>
+    <a href="#compare">10. Сравнение</a>
+    <a href="#migration">11. Карта миграции</a>
+  </div>
+
+  <!-- ============ 1 ============ -->
+  <h2 id="now">1. Как сейчас: ограничение одиночной сферы</h2>
+  <p>Сегодня у контакта <b>одно</b> значение <code>life_sphere</code> (Личное <i>или</i> Работа <i>или</i> Спам). Поэтому человек не может быть и личным, и рабочим одновременно. А «Новое» существует в двух несвязанных местах: вкладка во Входящих (про непрочитанные) и подраздел «Новые» в Контактах (про неподтверждённых).</p>
+
+  <div class="dgm alert">
+    <div class="dgm-title">Схема 1. Текущая модель — либо-либо</div>
+    <div class="flow-row wrap-nodes center">
+      <div class="nd">Контакт</div>
+      <div class="arr">→</div>
+      <div class="nd sub">life_sphere (одно значение)</div>
+    </div>
+    <div class="flow-row center" style="margin-top:10px">
+      <div class="flow-col">
+        <span class="branch-label">или</span>
+        <div class="nd green-bg">Личное</div>
+      </div>
+      <div class="arr">→</div>
+      <div class="flow-col">
+        <span class="branch-label">или</span>
+        <div class="nd sub">Работа</div>
+      </div>
+      <div class="arr">→</div>
+      <div class="flow-col">
+        <span class="branch-label">или</span>
+        <div class="nd spam">Спам</div>
+      </div>
+      <div class="arr">→</div>
+      <div class="nd red">«И личное, и работа» — невозможно <span class="warn">✘</span></div>
+    </div>
+    <p style="margin:12px 0 0"><b>Побочная проблема:</b> вкладка «Новое» во Входящих = «есть непрочитанные» (дублирует сортировку), а «Новые» в Контактах = <code>is_known=false</code>. Одно слово — два разных смысла.</p>
+  </div>
+
+  <!-- ============ 2 ============ -->
+  <h2 id="target">2. Целевая модель: две оси + спам</h2>
+  <p>Классификация распадается на две <b>независимые</b> оси, плюс эксклюзивный спам:</p>
+  <ul>
+    <li><b>Статус</b> — Новое (неподтверждённое) ⇄ Известное. Это и есть ваша идея «Новое на уровне сфер»: статус стоит в одном ряду с Личное/Работа/Спам, но логически это не метка, а жизненная стадия.</li>
+    <li><b>Метки</b> — { Личное ✱, Работа ✱ }. Множественные: у контакта обе сразу. Ни одна не обязательна.</li>
+    <li><b>Спам</b> — эксклюзивный флаг: «спама» не бывает «личный спам». Входящие от него блокируются; при «не спам» возвращаются прежние метки.</li>
+    <li><b>Папки</b> — многие-ко-многим: контакт может лежать и в «Семья» (личное), и в «Клиенты» (работа). Сфера у папки — только для навигации в сайдбаре.</li>
+  </ul>
+
+  <div class="dgm goal">
+    <div class="dgm-title">Схема 2. Целевая модель</div>
+    <div class="flow-col center">
+      <div class="nd">Контакт</div>
+    </div>
+    <div class="flow-row wrap-nodes center" style="margin-top:12px">
+      <div class="flow-col">
+        <span class="branch-label">ось 1 · статус</span>
+        <div class="nd amber">Новое</div>
+        <div class="arr">⇄</div>
+        <div class="nd sub">Известное</div>
+      </div>
+      <div class="arr">→</div>
+      <div class="flow-col">
+        <span class="branch-label">ось 2 · метки (можно обе)</span>
+        <div class="flow-row" style="gap:6px">
+          <div class="nd green-bg small">Личное ✱</div>
+          <div class="arr">+</div>
+          <div class="nd sub small">Работа ✱</div>
+        </div>
+        <div class="nd small gray">обе сразу — допустимо ✓</div>
+      </div>
+      <div class="arr">→</div>
+      <div class="flow-col">
+        <span class="branch-label">эксклюзив</span>
+        <div class="nd spam">Спам (флаг)</div>
+        <div class="nd small gray">блокирует входящие</div>
+      </div>
+      <div class="arr">→</div>
+      <div class="flow-col">
+        <span class="branch-label">папки (многие-ко-многим)</span>
+        <div class="nd small">Семья + Клиенты</div>
+        <div class="nd small gray">своя сфера — для навигации</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 3 ============ -->
+  <h2 id="venn">3. Вкладки «содержат метку»</h2>
+  <p>Вкладка «Личное» показывает контактов, у которых есть метка «Личное» — даже если «Работа» тоже стоит. Контакт с двумя метками виден в обеих вкладках (это пересечение, а не «либо-либо»). В списке у него два бейджа.</p>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 3. Венн-диаграмма: Личное ∩ Работа</div>
+    <div class="venn">
+      <div class="c c-a"></div>
+      <div class="c c-b"></div>
+      <div class="lbl lbl-a">Личное</div>
+      <div class="lbl lbl-b">Работа</div>
+      <div class="lbl lbl-spot">только<br>личное</div>
+      <div class="lbl lbl-spot2">только<br>рабочее</div>
+      <div class="lbl lbl-ab"><b>Личное + Работа</b><br><span class="tl-caption">виден в обеих вкладках, 2 бейджа</span></div>
+    </div>
+    <div class="flow-row center" style="margin-top:6px">
+      <div class="nd small green-bg">Вкладка «Личное»</div>
+      <div class="arr">=</div>
+      <div class="nd small">содержит метку Личное</div>
+      <div class="arr">+</div>
+      <div class="nd small">(всегда без спама)</div>
+    </div>
+  </div>
+
+  <h3>Как это читается в коде (замена <code>filterChats</code>)</h3>
+  <p>Сегодня фильтр «Личное» вырезает строго по равенству сферы. Целевой фильтр — <b>по наличию метки</b> в множестве:</p>
+  <pre style="background:var(--gray-bg);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:13px;overflow-x:auto"><code>// было:  c.contact.life_sphere === 'personal'
+// стало: c.contact.tags.includes('personal')   // метки из набора
+</code></pre>
+
+  <!-- ============ 4 ============ -->
+  <h2 id="life">4. Жизненный цикл контакта</h2>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 4. Состояния и переходы</div>
+    <div class="flow-col center">
+      <div class="nd gray">Входящее сообщение</div>
+      <div class="arr down" style="margin:4px 0">↓</div>
+      <div class="nd amber">НОВОЕ · метки: { }</div>
+      <div class="arr down" style="margin:4px 0">↓ «Разобрать» — поставить метки</div>
+      <div class="flow-row center" style="gap:14px">
+        <div class="flow-col">
+          <div class="nd green-bg">Известное<br><span style="font-weight:400" class="tl-caption">метки: { Личное }</span></div>
+        </div>
+        <div class="arr">|</div>
+        <div class="flow-col">
+          <div class="nd sub">Известное<br><span style="font-weight:400" class="tl-caption">метки: { Работа }</span></div>
+        </div>
+        <div class="arr">|</div>
+        <div class="flow-col">
+          <div class="nd green-bg" style="border-width:2.5px">Известное<br><span style="font-weight:400" class="tl-caption">метки: { Личное, Работа } ← две</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-row center" style="margin-top:14px">
+      <div class="flow-col">
+        <span class="branch-label">пометить спамом</span>
+        <div class="nd red">Спам (метки сброшены, прежние сохранены)</div>
+        <span class="branch-label" style="margin-top:6px">«не спам» →</span>
+        <div class="nd small gray">возврат к прежним меткам</div>
+      </div>
+      <div class="arr">→</div>
+      <div class="flow-col">
+        <span class="branch-label">ответили контакту</span>
+        <div class="nd small green-bg">Новое → Известное автоматически</div>
+      </div>
+      <div class="arr">→</div>
+      <div class="flow-col">
+        <span class="branch-label">заблокировать</span>
+        <div class="nd gray">Заблокирован — входящие пропускаются</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 5 ============ -->
+  <h2 id="example">5. Пример: «семья → заказчики»</h2>
+  <p>Ваш кейс: личный контакт (друг, мама) со временем становится заказчиком или поставщиком. Роль не заменяется, а <b>дополняется</b> — в этом главная причина, почему папки тоже должны быть множественными.</p>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 5. Эволюция роли во времени</div>
+    <div class="tl">
+      <div class="tl-node done">
+        <span class="badge new">НОВОЕ</span>
+        <p style="margin:6px 0 0"><b>Мама</b> написала впервые<br>метки: <span class="badge new">Новое</span></p>
+        <div class="tl-caption">явилась из входящего</div>
+      </div>
+      <div class="tl-arr">→</div>
+      <div class="tl-node">
+        <span class="badge personal">ЛИЧНОЕ</span>
+        <p style="margin:6px 0 0"><b>Мама</b> — семья<br>метки: <span class="badge personal">Личное</span><br>папка: <code>Семья</code></p>
+        <div class="tl-caption">разобрали вручную</div>
+      </div>
+      <div class="tl-arr">→</div>
+      <div class="tl-node" style="border-color:var(--amber);border-width:2.5px">
+        <span class="badge personal">ЛИЧНОЕ</span> <span class="badge work">РАБОТА</span>
+        <p style="margin:6px 0 0"><b>Мама</b> стала заказчицей<br>метки: <span class="badge personal">Личное</span> <span class="badge work">Работа</span><br>папки: <code>Семья</code> + <code>Клиенты</code></p>
+        <div class="tl-caption">появилась в «Личное» и «Работе» сразу</div>
+      </div>
+    </div>
+    <div class="flow-row center" style="margin-top:4px">
+      <div class="nd small gray">Фильтр «Личное» → находит (есть метка Личное)</div>
+      <div class="arr">+</div>
+      <div class="nd small gray">Фильтр «Клиенты» → находит (есть папка Клиенты)</div>
+    </div>
+  </div>
+
+  <!-- ============ 6 ============ -->
+  <h2 id="v-a">6. Вариант A — «Сферы-метки + статус» (основной)</h2>
+  <p>Это и есть целевая модель из разделов 2–4, оформленная как план. То, что было вкладкой «Новое»-про-непрочитанные, <b>заменяется</b> на «Новое»-про-неподтверждённых; непрочитанному остаются сортировка и бейджи.</p>
+
+  <div class="dgm goal">
+    <div class="dgm-title">Схема 6. Вариант A — корзины и один запрос на разбор</div>
+    <div class="flow-row wrap-nodes center">
+      <div class="nd">Все</div>
+      <div class="nd amber">Новое</div>
+      <div class="nd green-bg">Личное</div>
+      <div class="nd sub">Работа</div>
+      <div class="nd spam">Спам</div>
+    </div>
+    <p style="text-align:center;margin:12px 0">Классификация из контекста диалога:</p>
+    <div class="flow-col center">
+      <div class="flow-row">
+        <div class="nd amber">Новое</div>
+        <div class="arr">→</div>
+        <div class="flow-row" style="gap:6px">
+          <div class="nd small green-bg"><span class="badge personal">Личное</span> поставить</div>
+          <div class="nd small sub"><span class="badge work">Работа</span> поставить</div>
+          <div class="nd small red"><span class="badge spam">Спам</span></div>
+        </div>
+        <div class="arr">→</div>
+        <div class="nd small gray">один PATCH /contacts/bulk-update</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 7 ============ -->
+  <h2 id="v-b">7. Вариант B — «Умное Входящее»</h2>
+  <p>Не меняя саму модель, меняем <b>приоритет</b> списка и даём панель «Разобрать». Вместо простого «непрочитанные сверху» — приоритет-скор:</p>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 7. Приоритет-скор и панель «Разобрать»</div>
+    <div class="score-row"><span class="score-key">Непрочитанное</span><div class="score-track"><div class="score-fill" style="width:100%"></div></div><span class="score-val">×10</span></div>
+    <div class="score-row"><span class="score-key">Новый / неподтверждённый</span><div class="score-track"><div class="score-fill" style="width:50%"></div></div><span class="score-val">×5</span></div>
+    <div class="score-row"><span class="score-key">Свежесть последнего сообщения (0..1)</span><div class="score-track"><div class="score-fill" style="width:20%"></div></div><span class="score-val">×1</span></div>
+    <p style="text-align:center;margin:10px 0">Score = непрочитанное×10 + неподтверждённый×5 + свежесть×1  →  сортировка по убыванию</p>
+    <div class="flow-col center" style="margin-top:8px">
+      <div class="nd small gray">Панель «Разобрать» над списком:</div>
+      <div class="flow-row" style="gap:6px">
+        <div class="nd small green-bg">Личное (1 клик)</div>
+        <div class="nd small sub">Работа (1 клик)</div>
+        <div class="nd small red">Спам</div>
+        <div class="nd small amber">«Кто это?» — открыть карточку</div>
+      </div>
+    </div>
+    <div class="tl-caption" style="margin-top:10px">+ автоподтверждение: ответили контакту → «Новое» становится «Известным» без ручных действий.</div>
+  </div>
+
+  <!-- ============ 8 ============ -->
+  <h2 id="v-c">8. Вариант C — единый двигатель сортировки</h2>
+  <p>Сейчас во Входящих 2 режима на клиенте, в Контактах — 6 режимов в SQL. Объединяем в один набор ключей и направлений для обоих разделов.</p>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 8. Один набор ключей × направление → оба экрана</div>
+    <div class="flow-col center">
+      <div class="flow-row wrap-nodes center">
+        <div class="nd small sub">Имя</div>
+        <div class="nd small sub">Дата создания</div>
+        <div class="nd small sub">Сообщений</div>
+        <div class="nd small sub">Посл. активность</div>
+        <div class="nd small sub">Первое сообщение</div>
+        <div class="nd small sub">Задачи</div>
+        <div class="nd small sub">Непрочитанные</div>
+      </div>
+      <div class="flow-row" style="margin-top:8px">
+        <div class="nd small green">↑ asc</div>
+        <div class="arr">/</div>
+        <div class="nd small green">↓ desc</div>
+      </div>
+      <div class="arr down" style="margin:6px 0">↓</div>
+      <div class="flow-row" style="gap:20px">
+        <div class="nd small sub">Входящие (диалоги)</div>
+        <div class="arr">+</div>
+        <div class="nd small sub">Контакты (карточки)</div>
+      </div>
+      <div class="tl-caption">Переносится на сервер с честной пагинацией; группировка по меткам, а не по одиночной сфере.</div>
+    </div>
+  </div>
+
+  <!-- ============ 9 ============ -->
+  <h2 id="v-d">9. Вариант D — правила автоклассификации</h2>
+  <p>Новых «обрубков» становится меньше: правила сами вешают метки (в том числе несколько) или отправляют в спам.</p>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 9. Движок правил</div>
+    <div class="flow-col center">
+      <div class="nd">Входящее сообщение</div>
+      <div class="arr down" style="margin:4px 0">↓</div>
+      <div class="nd sub">Создаётся / находится контакт (Новое)</div>
+      <div class="arr down" style="margin:4px 0">↓ проверить правила</div>
+      <div class="flow-row center" style="gap:16px">
+        <div class="flow-col">
+          <div class="nd small gray">@друг →<br>добавить <span class="badge personal">Личное</span></div>
+          <div class="nd small gray">@company.ru →<br>добавить <span class="badge work">Работа</span> + папка Клиенты</div>
+          <div class="nd small gray">«опт/прайс/скидка» →<br><span class="badge spam">Спам</span></div>
+        </div>
+      </div>
+      <div class="flow-row center" style="margin-top:10px">
+        <div class="flow-col">
+          <span class="branch-label">совпадение есть</span>
+          <div class="nd green-bg">Метки добавлены (или Спам)</div>
+          <div class="tl-caption">контакт по-прежнему «Новое», пока не подтвердите</div>
+        </div>
+        <div class="arr">→</div>
+        <div class="flow-col">
+          <span class="branch-label">совпадений нет</span>
+          <div class="nd amber">Остаётся «Новое» без меток → ждёт ручного разбора</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 10 ============ -->
+  <h2 id="compare">10. Сравнение вариантов</h2>
+
+  <table>
+    <thead><tr><th>Вариант</th><th>Суть</th><th>Усилия</th><th>Миграция</th><th>Выгода</th><th>Сложность</th></tr></thead>
+    <tbody>
+      <tr><td><b>A</b> — сферы-метки + статус</td><td>«Новое» как статус, метки множественные</td><td class="warn">Высокие</td><td>Смена модели: <code>life_sphere</code> → набор меток + папки многие-ко-многим</td><td class="ok">Полная и честная картина «и личное, и работа»</td><td>Средняя</td></tr>
+      <tr><td><b>B</b> — умное входящее</td><td>Приоритет-скор + панель «Разобрать»</td><td>Средние</td><td>Нет (поверх текущей)</td><td class="ok">Быстрый выигрыш в UX, «завал» разгребается быстрее</td><td>Низкая</td></tr>
+      <tr><td><b>C</b> — единая сортировка</td><td>Один набор ключей + направления</td><td>Средние (бэкенд)</td><td>Частичная (алгоритмы Входящих)</td><td>Предсказуемость, меньше кода</td><td>Средняя</td></tr>
+      <tr><td><b>D</b> — правила</td><td>Авто-метки/спам по домену, нику, словам</td><td class="warn">Высокие</td><td>Только добавление (таблица правил)</td><td class="ok">Минимум ручной разборки</td><td>Средняя (риск ложных срабатываний)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Рекомендуемый порядок фаз</h3>
+  <div class="dgm">
+    <div class="dgm-title">Схема 10. Roadmap-фазы</div>
+    <div class="tl">
+      <div class="tl-node" style="border-color:var(--green)">
+        <b>Фаза 1</b> — Вариант A<br>модель «статус + метки», папки многие-ко-многим
+        <div class="tl-caption">фундамент: всё остальное строится поверх</div>
+      </div>
+      <div class="tl-arr">→</div>
+      <div class="tl-node">
+        <b>Фаза 2</b> — Вариант B<br>приоритет-скор + «Разобрать»
+        <div class="tl-caption">быстрый UX-выигрыш, почти без миграций</div>
+      </div>
+      <div class="tl-arr">→</div>
+      <div class="tl-node">
+        <b>Фаза 3</b> — Вариант D<br>правила автоклассификации
+        <div class="tl-caption">после того, как модель устоялась</div>
+      </div>
+      <div class="tl-node gray" style="border-style:dashed">
+        <b>Опционально</b> — Вариант C<br>унификация сортировки
+        <div class="tl-caption">в любой момент, независимо</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 11 ============ -->
+  <h2 id="migration">11. Карта миграции кода</h2>
+
+  <div class="dgm">
+    <div class="dgm-title">Схема 11. Что и где меняется</div>
+    <div class="file-map">
+      <div class="row head"><div>Место</div><div>Сейчас</div><div>Станет</div></div>
+      <div class="row"><div><code>types/contact.ts</code></div><div><code>life_sphere: 'personal'|'work'|'spam'|null</code></div><div>метки: <code>tags: ('personal'|'work')[]</code> + флаг <code>is_spam</code></div></div>
+      <div class="row"><div><code>types/contactType.ts</code></div><div><code>CONTACT_SPHERES</code> — 3 сферы</div><div>+ статус «Новое» отдельной мета, метки 2 шт.</div></div>
+      <div class="row"><div><code>models/contact.py</code></div><div>колонка <code>life_sphere</code>, <code>folder_id</code></div><div>junction <code>contact_spheres</code> и <code>contact_folders</code>; спам-флаг</div></div>
+      <div class="row"><div><code>contact_service.set_spam</code></div><div><code>previous_life_sphere</code></div><div>снапшот прежнего набора меток + папок</div></div>
+      <div class="row"><div><code>channel_message_service</code></div><div>пропуск по <code>life_sphere == 'spam'</code></div><div>пропуск по <code>is_spam == true</code> (логика та же)</div></div>
+      <div class="row"><div><code>utils/filterChats.ts</code>, вкладки</div><div>равенство сферы</div><div>«содержит метку»; «Новое» = <code>is_known=false</code></div></div>
+      <div class="row"><div><code>routers/contacts.py</code> bulk-update</div><div>один <code>life_sphere</code></div><div>принимает массив меток и список папок</div></div>
+    </div>
+    <p style="margin:12px 0 0"><b>Миграция данных:</b> текущие <code>life_sphere</code> и <code>folder_id</code> переносятся в junction как <b>первая</b> метка и <b>первая</b> папка — ничего не теряется, а дальше набор можно расширять.</p>
+  </div>
+
+  <div class="foot">Концепт-документ BiziBox · «Как сейчас» — справочник <code>sorting-classification.html</code> · вопросы по вариантам — раздел «Сравнение».</div>
+
+</div>
+</body>
+</html>

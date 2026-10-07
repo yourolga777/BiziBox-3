@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Чек-лист проверки Модуля «Каталог товаров + поставщики» — BiziBox</title>
+<style>
+  :root {
+    --primary: #6366f1;
+    --primary-light: #eef2ff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --amber: #d97706;
+    --amber-bg: #fffbeb;
+    --gray-bg: #f1f5f9;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    line-height: 1.6;
+    background: #f8fafc;
+    padding: 24px 16px;
+  }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 40px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  }
+
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 {
+    font-size: 19px;
+    margin: 32px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--primary);
+    display: inline-block;
+  }
+  p { margin: 8px 0; }
+  .lead { color: var(--muted); font-size: 14px; }
+  code {
+    background: var(--gray-bg);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  pre {
+    background: var(--gray-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    overflow-x: auto;
+    font-size: 12.5px;
+  }
+
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 14px 0 4px; }
+  .toolbar .spacer { flex: 1; }
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 8px;
+    transition: background .15s;
+  }
+  button:hover { background: var(--gray-bg); }
+  button.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+  button.primary:hover { background: #5558d9; }
+  button.danger { color: var(--red); }
+  button.danger:hover { background: var(--red-bg); }
+
+  .progress-block { margin: 12px 0 0; }
+  .progress-bar { height: 8px; background: var(--gray-bg); border-radius: 99px; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--green);
+    border-radius: 99px;
+    transition: width .25s;
+  }
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 0 0 8px;
+    background: #fff;
+  }
+  .item.checked { background: var(--green-bg); border-color: #bbf7d0; }
+  .item.checked .label { text-decoration: line-through; color: var(--muted); }
+
+  .item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 3px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transform: translateY(2px);
+  }
+
+  .item-body { flex: 1; }
+  .item .label { cursor: pointer; }
+
+  .item .comment {
+    display: none;
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 26px;
+    outline: none;
+  }
+  .item.checked .comment,
+  .item .comment:focus { display: block; }
+
+  .note-box {
+    background: var(--primary-light);
+    border: 1px solid #c7d2fe;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    margin: 12px 0;
+  }
+
+  .fixed-box {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font: inherit;
+    font-size: 13.5px;
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    background: var(--amber-bg);
+  }
+
+  .verdict-banner {
+    display: none;
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .verdict-banner.pass { display: block; background: var(--green-bg); color: var(--green); border: 1px solid #bbf7d0; }
+  .verdict-banner.fail { display: block; background: var(--red-bg); color: var(--red); border: 1px solid #fecaca; }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+(function () {
+  var STORAGE_KEY = 'bizibox-catalog-checklist-v1';
+
+  var SECTIONS = [
+    { id: 'nav', title: '1. Навигация', items: [
+      'В сайдбаре появился пункт «Каталог» (иконка корзины), переход по нему открывает страницу.',
+      'В шапке страницы заголовок «Каталог» и кнопки «Импорт / CSV / Поставщики / Товар».',
+    ]},
+    { id: 'table', title: '2. Таблица товаров', items: [
+      'Пустая страница показывает заглушку «Товаров пока нет» (не падает).',
+      'Созданные товары видны в таблице: название, артикул, цена, закупка, наценка (%), остаток, поставщик.',
+      'Поиск по названию/артикулу фильтрует строки (введите часть названия).',
+      'Сортировка по столбцам «Название / Цена / Остаток» работает (клик по заголовку меняет направление).',
+      'Фильтр по поставщику показывает только его товары.',
+    ]},
+    { id: 'create', title: '3. Создание и редактирование товара', items: [
+      'Кнопка «Товар» → модал «Новый товар» с полями: название, артикул, ед., цена, закупка, остаток, поставщик, описание.',
+      'Создание без названия показывает ошибку «Укажите название товара».',
+      'Создание с заполненными полями → товар появился в таблице; наценка считается автоматически (цена − закупка).',
+      'Дублирующийся артикул (SKU) при создании → ошибка/предупреждение, товар не создан.',
+      '«Изменить» на строке → модал с текущими значениями; после сохранения таблица обновилась.',
+      '«Удалить» на строке → подтверждение; товар исчезает из таблицы.',
+    ]},
+    { id: 'suppliers', title: '4. Поставщики', items: [
+      'Кнопка «Поставщики» → модал со списком поставщиков и полем выбора контакта.',
+      'Выбор контакта + «Добавить поставщика» → поставщик появился в списке.',
+      'Повторное добавление того же контакта → ошибка (1:1, один поставщик на контакт).',
+      '«Удалить» поставщика → исчезает из списка; товары при этом не удаляются.',
+      'В форме товара в выпадающем списке «Поставщик» видны добавленные поставщики.',
+    ]},
+    { id: 'order', title: '5. Выбор товара в заказе', items: [
+      'На странице «Заказы» → «Создать» → в строке позиции появилась иконка выбора из каталога (коробка/лупа).',
+      'Клик по иконке → поиск по каталогу; выбор товара подставляет название и цену, связывает товар (product_id).',
+      'Итоговая сумма заказа пересчитывается с учётом подставленной цены.',
+    ]},
+    { id: 'csv', title: '6. CSV-импорт и экспорт', items: [
+      '«CSV» → скачался <code>products.csv</code> с колонками name, sku, price, purchase_price, stock, unit, description, supplier; русский текст читается.',
+      '«Импорт» → выбрать CSV → после импорта сообщение «создано N, обновлено M, пропущено K».',
+      'Импорт с неизвестным поставщиком (поле supplier) → автоматически создан контакт + поставщик; товар привязан.',
+      'Повторный импорт с тем же SKU обновляет существующий товар (не дублирует).',
+    ]},
+    { id: 'offline', title: '7. Офлайн-кеш', items: [
+      'Остановить backend → страница «Каталог» не падает, показывает кешированные товары из IndexedDB (DB v8).',
+      'Создать товар при выключенном backend → карточка появляется сразу без ошибок (optimistic).',
+      'Запустить backend → данные обновились после перезагрузки страницы.',
+    ]},
+    { id: 'finish', title: '8. Завершение', items: [
+      'В терминале uvicorn и в <code>data\\logs\\bizibox.log</code> нет ERROR, связанных с проверкой.',
+      'Тосты ошибок в UI не появлялись при описанных сценариях.',
+    ]},
+  ];
+
+  var FAIL_TITLE = 'Если что-то упало';
+  var state = { checked: {}, comments: {}, note: '' };
+  var fields = {};
+
+  function safeGet() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); }
+    catch (e) { return null; }
+  }
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { /* ignore quota */ }
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function countItems() {
+    var total = 0;
+    SECTIONS.forEach(function (s) { total += s.items.length; });
+    return total;
+  }
+
+  var TOTAL = countItems();
+
+  function checkedCount() {
+    var n = 0;
+    for (var key in state.checked) if (state.checked[key]) n++;
+    return n;
+  }
+
+  function render() {
+    var app = document.getElementById('app');
+    var html = '';
+    html += '<h1>Чек-лист проверки Модуля «Каталог товаров + поставщики»</h1>';
+    html += '<p class="lead">Галочки и комментарии сохраняются автоматически (localStorage). Готовый отчёт можно скачать или скопировать.</p>';
+
+    html += '<div class="note-box">';
+    html += '<b>Автопроверка:</b> backend <code>test_products.py</code>, <code>test_suppliers.py</code>, <code>test_products_export_csv.py</code>, <code>test_products_import_csv.py</code> + остальной набор — <b>507 passed</b>; ruff/mypy чисто. ';
+    html += 'Frontend <code>Products.test.tsx</code> + существующие — <b>191 passed</b>; lint/tsc чисто; <code>npm run build</code> собирается. ';
+    html += 'Миграция <code>a0b1c2d3e4f5</code> (products/suppliers + FK order_items.product_id). Exe пересобран 29.09.2026.';
+    html += '</div>';
+
+    html += '<div class="progress-block">';
+    html += '<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>';
+    html += '<div class="progress-text"><span id="progressLabel">0 из ' + TOTAL + '</span><span id="verdictText"></span></div>';
+    html += '</div>';
+
+    html += '<div class="verdict-banner" id="verdictBanner"></div>';
+
+    SECTIONS.forEach(function (sec) {
+      html += '<h2>' + esc(sec.title) + '</h2>';
+      sec.items.forEach(function (text, i) {
+        var key = sec.id + '-' + i;
+        var checked = !!state.checked[key];
+        html += '<div class="item' + (checked ? ' checked' : '') + '" id="row-' + key + '">';
+        html += '<input type="checkbox" id="cb-' + key + '"' + (checked ? ' checked' : '') + '>';
+        html += '<div class="item-body">';
+        html += '<div class="label" data-target="cb-' + key + '">' + text + '</div>';
+        html += '<textarea class="comment" id="cm-' + key + '" rows="1" placeholder="Комментарий / что увидел(а)…">' + esc(state.comments[key] || '') + '</textarea>';
+        html += '</div>';
+        html += '</div>';
+      });
+    });
+
+    html += '<h2>' + esc(FAIL_TITLE) + '</h2>';
+    html += '<p class="lead">Если пункт не прошёл — отметьте ошибку в комментарии к нему и опишите здесь обстановку.</p>';
+    html += '<textarea class="fixed-box" id="noteBox" placeholder="Номер пункта, что делали, что увидели (текст ошибки / скриншот / порт). Health: http://127.0.0.1:7910/api/health.">' + esc(state.note) + '</textarea>';
+
+    html += '<div class="toolbar">';
+    html += '<button class="primary" id="btnExport">Скачать отчёт</button>';
+    html += '<button id="btnCopy">Скопировать отчёт</button>';
+    html += '<span class="spacer"></span>';
+    html += '<button class="danger" id="btnReset">Сбросить всё</button>';
+    html += '</div>';
+
+    app.innerHTML = html;
+
+    SECTIONS.forEach(function (sec) {
+      sec.items.forEach(function (text, i) {
+        var key = sec.id + '-' + i;
+        fields['cb-' + key] = document.getElementById('cb-' + key);
+        fields['cm-' + key] = document.getElementById('cm-' + key);
+        var label = document.querySelector('.label[data-target="cb-' + key + '"]');
+        if (label) label.addEventListener('click', function (e) {
+          if (e.target === label) fields['cb-' + key].click();
+        });
+        fields['cb-' + key].addEventListener('change', onChangeCheck);
+        fields['cm-' + key].addEventListener('change', onChangeComment);
+        fields['cm-' + key].addEventListener('input', autoResize);
+        autoResize.call(fields['cm-' + key]);
+      });
+    });
+    fields.noteBox = document.getElementById('noteBox');
+    fields.noteBox.addEventListener('change', onChangeNote);
+
+    document.getElementById('btnExport').addEventListener('click', exportReport);
+    document.getElementById('btnCopy').addEventListener('click', copyReport);
+    document.getElementById('btnReset').addEventListener('click', resetAll);
+
+    updateProgress();
+  }
+
+  function autoResize() {
+    this.style.height = 'auto';
+    this.style.height = Math.max(26, this.scrollHeight) + 'px';
+  }
+
+  function onChangeCheck(e) {
+    var id = e.target.id.replace('cb-', '');
+    state.checked[id] = e.target.checked;
+    var row = document.getElementById('row-' + id);
+    row.classList.toggle('checked', e.target.checked);
+    save();
+    updateProgress();
+  }
+
+  function onChangeComment(e) {
+    var id = e.target.id.replace('cm-', '');
+    state.comments[id] = e.target.value.trim();
+    save();
+  }
+
+  function onChangeNote(e) {
+    state.note = e.target.value.trim();
+    save();
+  }
+
+  function updateProgress() {
+    var done = checkedCount();
+    var fill = document.getElementById('progressFill');
+    var label = document.getElementById('progressLabel');
+    var verdict = document.getElementById('verdictText');
+    var banner = document.getElementById('verdictBanner');
+
+    fill.style.width = (TOTAL ? (done / TOTAL * 100) : 0) + '%';
+    label.textContent = done + ' из ' + TOTAL + (done === TOTAL ? ' — готово' : '');
+
+    if (done === TOTAL) {
+      verdict.textContent = 'Все пункты пройдены';
+      banner.textContent = 'Результат: ПРОЙДЕНО ✓ — все ' + TOTAL + ' пунктов закрыты без ошибок.';
+      banner.className = 'verdict-banner pass';
+    } else {
+      verdict.textContent = done === 0 ? '' : 'Осталось: ' + (TOTAL - done);
+      banner.className = 'verdict-banner fail';
+      banner.textContent = 'Результат: ЕСТЬ НЕЗАКРЫТЫЕ ПУНКТЫ — закрыто ' + done + ' из ' + TOTAL + '.';
+    }
+  }
+
+  function buildReport() {
+    var lines = [];
+    var now = new Date();
+    var dateStr = now.toLocaleDateString('ru-RU') + ', ' + now.toLocaleTimeString('ru-RU');
+    var done = checkedCount();
+    lines.push('ОТЧЁТ ПРОВЕРКИ МОДУЛЯ «КАТАЛОГ ТОВАРОВ + ПОСТАВЩИКИ» — BiziBox');
+    lines.push('Дата: ' + dateStr);
+    lines.push('Результат: ' + (done === TOTAL ? 'ПРОЙДЕНО' : 'ЕСТЬ НЕЗАКРЫТЫЕ ПУНКТЫ') + ' (' + done + ' из ' + TOTAL + ')');
+    lines.push('');
+
+    SECTIONS.forEach(function (sec) {
+      lines.push('## ' + sec.title);
+      sec.items.forEach(function (text, i) {
+        var key = sec.id + '-' + i;
+        var mark = state.checked[key] ? '[x]' : '[ ]';
+        var plain = text.replace(/<[^>]+>/g, '');
+        if (state.comments[key]) {
+          lines.push('  ' + mark + ' ' + plain + '  —  комментарий: ' + state.comments[key]);
+        } else {
+          lines.push('  ' + mark + ' ' + plain);
+        }
+      });
+      lines.push('');
+    });
+
+    if (state.note) {
+      lines.push('## ' + FAIL_TITLE);
+      lines.push(state.note);
+      lines.push('');
+    }
+    lines.push('---');
+    lines.push('Сформировано из чек-листа: docs/user-guide/checklist-catalog.html');
+    return lines.join('\n');
+  }
+
+  function exportReport() {
+    var text = buildReport();
+    var now = new Date().toISOString().slice(0, 10);
+    var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bizibox-catalog-проверка-' + now + '.txt';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  function copyReport() {
+    var text = buildReport();
+    function done() { alert('Отчёт скопирован в буфер обмена.'); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); });
+    } else {
+      fallbackCopy(text);
+    }
+    function fallbackCopy(t) {
+      var ta = document.createElement('textarea');
+      ta.value = t;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); }
+      catch (e) { alert('Не удалось скопировать. Используйте «Скачать отчёт».'); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  function resetAll() {
+    if (!confirm('Сбросить все галочки и комментарии? Это действие необратимо.')) return;
+    state = { checked: {}, comments: {}, note: '' };
+    save();
+    render();
+  }
+
+  var saved = safeGet();
+  if (saved && saved.checked && saved.comments) state = saved;
+  render();
+})();
+</script>
+</body>
+</html>

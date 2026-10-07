@@ -1,0 +1,147 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.egg
+*.pyc
+
+# Node
+node_modules/
+frontend/dist/
+frontend/dev-dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+backend/.env
+
+# Database
+*.db
+*.db-wal
+*.db-shm
+
+# TAUSIK local state
+.tausik/
+
+# Installer output
+installer/output/
+
+# PyInstaller build artifacts
+backend/dist/
+backend/build/
+
+# Backup docs
+777/
+
+# Logs
+*.log
+*.err
+server_out.txt
+backend/data/logs/
+
+# Encryption / secrets
+backend/data/.encryption_key
+backend/app/data/.encryption_key
+
+# Telegram sessions
+backend/data/sessions/
+
+# DB data (schema is migrations)
+backend/data/bizibox.db
+
+# DB auto-backups (R1-12)
+backups/
+
+# Review artifacts (life-sphere DB copy)
+backend/data/bizibox.db.bak-*
+
+# Per-user runtime data (r3-d)
+backend/data/.active_login
+backend/data/users/
+backend/data/attachments/
+backend/data/bizibox.db.legacy
+
+# Built docs
+site/
+
+# Runtime AI state (regenerated from DEFAULT_RULES/DEFAULT_AI_CONFIG in code)
+backend/data/ai_config.json
+backend/data/ai_rules.json
+
+# Per-user onboarding (runtime; canonical copy lives in backend/data/users/<login>/)
+backend/data/onboarding.enc
+
+# DB backups (any extension)
+*.db.backup
+*.db.bak-*
+backend/data/backup/
+
+# Legacy top-level data dir (canonical runtime dir is backend/data/)
+/data/
+
+# Business scratch docs (do not commit)
+~$*
+as is.txt
+Конкуренты.txt
+Правки 1808.txt
+
+# Business docs — do not commit to public repo
+BiziBox_Investor_Overview.pptx
+MVP - FIN.xlsx
+docs/MVP - FIN.xlsx
+catalog.csv
+SYSTEM_PROMPT.md
+TAUSIK_MEMORY.md
+*.docx
+
+# Dependency graph (generated on-demand)
+graph.json
+
+# Diagnostic one-off scripts (dev only, do not commit)
+backend/_check_db.py
+backend/diag_send_code.py
+backend/start_logged.ps1
+
+# Legacy business samples (product catalog dropped from BiziBox)
+samples/
+
+# Internal working notes / review artifacts (do not commit to public repo)
+BACKLOG.md
+BUGLOG.md
+NEXT_SESSION.md
+TAUSIK_TRANSFER.md
+CLAUDE.md
+ИНСТРУКЦИЯ.md
+Фикс *.txt
+фиксы *.txt
+*checkup*.txt
+Проверки.md
+docs/release-*/
+docs/help/
+
+# Рабочие заметки и чек-листы (do not commit)
+ПЛАН-РЕАЛИЗАЦИИ.md
+ЧЕК-ЛИСТ-ПРОВЕРКА*.md
+тестовый-каталог.csv
+
+# Агентское/dev-окружение
+.opencode/
+.tausik-lib/
+.mcp.json
+opencode.json
+.pre-commit-config.yaml
+
+# Установщик (сборка отключена)
+installer/

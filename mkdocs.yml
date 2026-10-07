@@ -1,0 +1,39 @@
+site_name: BiziBox
+site_description: Личное PWA-приложение «сообщения и дела в одном окне»
+site_author: BiziBox
+repo_url: https://github.com/yourolga777/BiziBox
+site_url: https://yourolga777.github.io/BiziBox
+
+theme:
+  name: material
+  language: ru
+  palette:
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+
+nav:
+  - Главная: index.md
+  - Руководство пользователя:
+    - Установка: user-guide/installation.md
+    - Быстрый старт: user-guide/quick-start.md
+    - Подключение каналов: user-guide/channels.md
+    - Входящие: user-guide/inbox.md
+    - Контакты: user-guide/contacts.md
+    - Задачи: user-guide/tasks.md
+    - Календарь: user-guide/calendar.md
+    - Дашборд: user-guide/dashboard.md
+    - Частые вопросы: user-guide/faq.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+
+copyright: Copyright &copy; 2026 BiziBox

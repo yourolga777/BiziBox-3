@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Чек-лист проверки Модуля «Заказы» — BiziBox</title>
+<style>
+  :root {
+    --primary: #6366f1;
+    --primary-light: #eef2ff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --amber: #d97706;
+    --amber-bg: #fffbeb;
+    --gray-bg: #f1f5f9;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    line-height: 1.6;
+    background: #f8fafc;
+    padding: 24px 16px;
+  }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 40px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  }
+
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 {
+    font-size: 19px;
+    margin: 32px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--primary);
+    display: inline-block;
+  }
+  p { margin: 8px 0; }
+  .lead { color: var(--muted); font-size: 14px; }
+  code {
+    background: var(--gray-bg);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  pre {
+    background: var(--gray-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    overflow-x: auto;
+    font-size: 12.5px;
+  }
+
+  /* Toolbar */
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 14px 0 4px; }
+  .toolbar .spacer { flex: 1; }
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 8px;
+    transition: background .15s;
+  }
+  button:hover { background: var(--gray-bg); }
+  button.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+  button.primary:hover { background: #5558d9; }
+  button.danger { color: var(--red); }
+  button.danger:hover { background: var(--red-bg); }
+
+  /* Progress */
+  .progress-block { margin: 12px 0 0; }
+  .progress-bar { height: 8px; background: var(--gray-bg); border-radius: 99px; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--green);
+    border-radius: 99px;
+    transition: width .25s;
+  }
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* Checklist */
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 0 0 8px;
+    background: #fff;
+  }
+  .item.checked { background: var(--green-bg); border-color: #bbf7d0; }
+  .item.checked .label { text-decoration: line-through; color: var(--muted); }
+
+  .item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 3px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transform: translateY(2px);
+  }
+
+  .item-body { flex: 1; }
+  .item .label { cursor: pointer; }
+
+  .item .comment {
+    display: none;
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 26px;
+    outline: none;
+  }
+  .item.checked .comment,
+  .item .comment:focus { display: block; }
+
+  .note-box {
+    background: var(--primary-light);
+    border: 1px solid #c7d2fe;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    margin: 12px 0;
+  }
+
+  .fixed-box {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font: inherit;
+    font-size: 13.5px;
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    background: var(--amber-bg);
+  }
+
+  .verdict-banner {
+    display: none;
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .verdict-banner.pass { display: block; background: var(--green-bg); color: var(--green); border: 1px solid #bbf7d0; }
+  .verdict-banner.fail { display: block; background: var(--red-bg); color: var(--red); border: 1px solid #fecaca; }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+(function () {
+  var STORAGE_KEY = 'bizibox-order-checklist-v1';
+
+  var SECTIONS = [
+    { id: 'prep', title: '0. Подготовка (запуск из исходного кода)', items: [
+      'Запустить backend: <code>python -m uvicorn app.main:app --port 7910</code> — старт без <code>ERROR</code>, применилась миграция заказов.',
+      'Запустить frontend: <code>npm run dev</code> — открыть <code>http://localhost:5173</code> (Vite проксирует /api на 7910).',
+      'Есть хотя бы один контакт (или создан на странице «Контакты») — нужен для создания заказа.',
+    ]},
+    { id: 'nav', title: '1. Навигация', items: [
+      'В сайдбаре появился пункт «Заказы» (иконка коробки), переход по нему открывает страницу.',
+      'В шапке страницы заголовок «Заказы» и счётчик «N заказов».',
+    ]},
+    { id: 'kanban', title: '2. Канбан и статистика', items: [
+      'Видны 4 колонки: Новый · В работе · Отправлен · Завершён, у каждой цветной маркер статуса.',
+      'Над канбаном 5 карточек статистики: Всего, Новых, В работе, Отправлено, Сумма активных (в ₽).',
+      'Пустые колонки показывают заглушку («нет заказов»), страница не падает.',
+    ]},
+    { id: 'create', title: '3. Создание заказа', items: [
+      'Кнопка «Создать» → открывается модал.',
+      'В поле клиента работает поиск по контактам; можно выбрать существующий контакт.',
+      'Можно ввести новый контакт (имя, телефон) прямо в форме — после сохранения он появится в «Контактах».',
+      'Заполнить «Адрес доставки» и «Способ оплаты» (Карта / Наличные).',
+      'Выбрать товар, количество, цену; сумма пересчитывается при изменении позиций; можно добавить несколько строк.',
+      'Сохранить → тост «Заказ создан», модал закрывается, карточка в колонке «Новый» с номером вида <code>ORD-20260924-0001</code>.',
+      'Создать второй заказ — номера различаются, порядковый номер растёт.',
+    ]},
+    { id: 'dnd', title: '4. Drag & drop', items: [
+      'Перетащить карточку из «Новый» в «В работе» → карточка переселилась.',
+      'Обновить страницу (F5) → карточка осталась «В работе» (сохранено на сервере).',
+      'Перетащить карточку в «Отправлен» и «Завершён» — работает так же.',
+      'Колонки «Отменён» в канбане нет (статус отмены доступен только в карточке заказа).',
+    ]},
+    { id: 'detail', title: '5. Карточка заказа (детальный просмотр)', items: [
+      'Видны: клиент, номер заказа, дата, статус (выпадающий список), тумблер «Оплачен».',
+      'Блок «Адрес доставки» редактируемый — сохраняется (переоткрыть модал → значение на месте).',
+      'Блок «Способ оплаты» редактируемый — сохраняется.',
+      'Позиции: «+ Добавить» (название, кол-во, цена) → строка появилась, сумма пересчиталась.',
+      'Удаление позиции (иконка корзины) → строка исчезла, сумма пересчиталась.',
+      'Комментарии: написать текст → комментарий появился в списке с датой.',
+      'Удаление комментария (иконка) → комментарий исчез.',
+      'Сменить статус селектом → после закрытия модала карточка в канбане переместилась.',
+      'Тумблер «Оплачен» → состояние изменилось и сохранилось после перезагрузки страницы.',
+      'Кнопка удаления: подтверждение «Переместить заказ в архив?» → заказ исчезает из канбана.',
+    ]},
+    { id: 'csv', title: '6. Экспорт CSV', items: [
+      'Нажать «CSV» в шапке → скачался <code>orders.csv</code>, тост «CSV выгружен».',
+      'В Excel данные разбились по колонкам (номер, клиент, товары, сумма, статус, дата); русский текст читается.',
+      'Создать второй заказ и выгрузить снова → он есть в файле.',
+    ]},
+    { id: 'message', title: '7. Заказ из сообщения', items: [
+      'Во «Входящих» открыт диалог с сообщением; в действиях сообщения есть кнопка «+ Заказ».',
+      'Модал создания открылся, контакт подставлен из сообщения.',
+      'Если в тексте распознана сумма — в превью строка «Возможная сумма заказа: N ₽».',
+      'Сохранить → заказ создан, карточка появилась в «Новом».',
+    ]},
+    { id: 'offline', title: '8. Офлайн-кеш', items: [
+      'Остановить backend → страница «Заказы» не падает, показывает ранее загруженные заказы из кеша (IndexedDB, store orders, DB v7).',
+      'Создать заказ при выключенном backend → карточка появляется сразу без ошибок (optimistic-режим).',
+      'Запустить backend → нажать «Обновить» → данные с сервера обновились.',
+      'Создать заказ офлайн, дождаться восстановления backend — заказ не потерялся и доступен после перезагрузки страницы.',
+    ]},
+    { id: 'owner', title: '9. Изоляция по владельцу', items: [
+      'Заказы и позиции другого owner_id не видны и не меняются (проверяется автотестами backend; ручная проверка — при наличии второго логина).',
+    ]},
+    { id: 'finish', title: '10. Завершение', items: [
+      'В терминале uvicorn и в <code>data\\logs\\bizibox.log</code> нет ERROR, связанных с проверкой.',
+      'Тосты ошибок в UI не появлялись при описанных сценариях.',
+    ]},
+  ];
+
+  var FAIL_TITLE = 'Если что-то упало';
+  var state = { checked: {}, comments: {}, note: '' };
+  var fields = {};
+
+  function safeGet() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); }
+    catch (e) { return null; }
+  }
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { /* ignore quota */ }
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function countItems() {
+    var total = 0;
+    SECTIONS.forEach(function (s) { total += s.items.length; });
+    return total;
+  }
+
+  var TOTAL = countItems();
+
+  function checkedCount() {
+    var n = 0;
+    for (var key in state.checked) if (state.checked[key]) n++;
+    return n;
+  }
+
+  function render() {
+    var app = document.getElementById('app');
+    var html = '';
+    html += '<h1>Чек-лист проверки Модуля «Заказы»</h1>';
+    html += '<p class="lead">Галочки и комментарии сохраняются автоматически в браузере (localStorage). Готовый отчёт можно скачать или скопировать кнопками внизу.</p>';
+
+    html += '<div class="note-box">';
+    html += '<b>Автопроверка:</b> backend <code>tests/test_orders.py</code>, <code>test_orders_export_csv.py</code>, <code>test_order_extractor.py</code> + остальной набор — <b>474 passed</b>; ruff/mypy чисто. ';
+    html += 'Frontend <code>Orders.test.tsx</code> + существующие тесты — <b>187 passed</b>; lint чисто; <code>npm run build</code> собирается. ';
+    html += 'Таблицы создаются миграцией <code>f7a8b9c0d1e2</code> автоматически при старте backend. Exe пересобран 25.09.2026.';
+    html += '</div>';
+
+    html += '<div class="progress-block">';
+    html += '<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>';
+    html += '<div class="progress-text"><span id="progressLabel">0 из ' + TOTAL + '</span><span id="verdictText"></span></div>';
+    html += '</div>';
+
+    html += '<div class="verdict-banner" id="verdictBanner"></div>';
+
+    SECTIONS.forEach(function (sec) {
+      html += '<h2>' + esc(sec.title) + '</h2>';
+      sec.items.forEach(function (text, i) {
+        var key = sec.id + '-' + i;
+        var checked = !!state.checked[key];
+        html += '<div class="item' + (checked ? ' checked' : '') + '" id="row-' + key + '">';
+        html += '<input type="checkbox" id="cb-' + key + '"' + (checked ? ' checked' : '') + '>';
+        html += '<div class="item-body">';
+        html += '<div class="label" data-target="cb-' + key + '">' + text + '</div>';
+        html += '<textarea class="comment" id="cm-' + key + '" rows="1" placeholder="Комментарий / что увидел(а)…">' + esc(state.comments[key] || '') + '</textarea>';
+        html += '</div>';
+        html += '</div>';
+      });
+    });
+
+    html += '<h2>' + esc(FAIL_TITLE) + '</h2>';
+    html += '<p class="lead">Если пункт не прошёл — отметьте ошибку в комментарии к нему и опишите здесь обстановку.</p>';
+    html += '<textarea class="fixed-box" id="noteBox" placeholder="Номер пункта, что делали, что увидели (текст ошибки / скриншот / порт). Health: http://127.0.0.1:7910/api/health.">' + esc(state.note) + '</textarea>';
+
+    html += '<div class="toolbar">';
+    html += '<button class="primary" id="btnExport">Скачать отчёт</button>';
+    html += '<button id="btnCopy">Скопировать отчёт</button>';
+    html += '<span class="spacer"></span>';
+    html += '<button class="danger" id="btnReset">Сбросить всё</button>';
+    html += '</div>';
+
+    app.innerHTML = html;
+
+    SECTIONS.forEach(function (sec) {
+      sec.items.forEach(function (text, i) {
+        var key = sec.id + '-' + i;
+        fields['cb-' + key] = document.getElementById('cb-' + key);
+        fields['cm-' + key] = document.getElementById('cm-' + key);
+        var label = document.querySelector('.label[data-target="cb-' + key + '"]');
+        if (label) label.addEventListener('click', function (e) {
+          if (e.target === label) fields['cb-' + key].click();
+        });
+        fields['cb-' + key].addEventListener('change', onChangeCheck);
+        fields['cm-' + key].addEventListener('change', onChangeComment);
+        fields['cm-' + key].addEventListener('input', autoResize);
+        autoResize.call(fields['cm-' + key]);
+      });
+    });
+    fields.noteBox = document.getElementById('noteBox');
+    fields.noteBox.addEventListener('change', onChangeNote);
+
+    document.getElementById('btnExport').addEventListener('click', exportReport);
+    document.getElementById('btnCopy').addEventListener('click', copyReport);
+    document.getElementById('btnReset').addEventListener('click', resetAll);
+
+    updateProgress();
+  }
+
+  function autoResize() {
+    this.style.height = 'auto';
+    this.style.height = Math.max(26, this.scrollHeight) + 'px';
+  }
+
+  function onChangeCheck(e) {
+    var id = e.target.id.replace('cb-', '');
+    state.checked[id] = e.target.checked;
+    var row = document.getElementById('row-' + id);
+    row.classList.toggle('checked', e.target.checked);
+    save();
+    updateProgress();
+  }
+
+  function onChangeComment(e) {
+    var id = e.target.id.replace('cm-', '');
+    state.comments[id] = e.target.value.trim();
+    save();
+  }
+
+  function onChangeNote(e) {
+    state.note = e.target.value.trim();
+    save();
+  }
+
+  function updateProgress() {
+    var done = checkedCount();
+    var fill = document.getElementById('progressFill');
+    var label = document.getElementById('progressLabel');
+    var verdict = document.getElementById('verdictText');
+    var banner = document.getElementById('verdictBanner');
+
+    fill.style.width = (TOTAL ? (done / TOTAL * 100) : 0) + '%';
+    label.textContent = done + ' из ' + TOTAL + (done === TOTAL ? ' — готово' : '');
+
+    if (done === TOTAL) {
+      verdict.textContent = 'Все пункты пройдены';
+      banner.textContent = 'Результат: ПРОЙДЕНО ✓ — все ' + TOTAL + ' пунктов закрыты без ошибок.';
+      banner.className = 'verdict-banner pass';
+    } else {
+      verdict.textContent = done === 0 ? '' : 'Осталось: ' + (TOTAL - done);
+      banner.className = 'verdict-banner fail';
+      banner.textContent = 'Результат: ЕСТЬ НЕЗАКРЫТЫЕ ПУНКТЫ — закрыто ' + done + ' из ' + TOTAL + '.';
+    }
+  }
+
+  function buildReport() {
+    var lines = [];
+    var now = new Date();
+    var dateStr = now.toLocaleDateString('ru-RU') + ', ' + now.toLocaleTimeString('ru-RU');
+    var done = checkedCount();
+    lines.push('ОТЧЁТ ПРОВЕРКИ МОДУЛЯ «ЗАКАЗЫ» — BiziBox');
+    lines.push('Дата: ' + dateStr);
+    lines.push('Результат: ' + (done === TOTAL ? 'ПРОЙДЕНО' : 'ЕСТЬ НЕЗАКРЫТЫЕ ПУНКТЫ') + ' (' + done + ' из ' + TOTAL + ')');
+    lines.push('');
+
+    SECTIONS.forEach(function (sec) {
+      lines.push('## ' + sec.title);
+      sec.items.forEach(function (text, i) {
+        var key = sec.id + '-' + i;
+        var mark = state.checked[key] ? '[x]' : '[ ]';
+        var plain = text.replace(/<[^>]+>/g, '');
+        if (state.comments[key]) {
+          lines.push('  ' + mark + ' ' + plain + '  —  комментарий: ' + state.comments[key]);
+        } else {
+          lines.push('  ' + mark + ' ' + plain);
+        }
+      });
+      lines.push('');
+    });
+
+    if (state.note) {
+      lines.push('## ' + FAIL_TITLE);
+      lines.push(state.note);
+      lines.push('');
+    }
+    lines.push('---');
+    lines.push('Сформировано из чек-листа: docs/user-guide/checklist-orders.html');
+    return lines.join('\n');
+  }
+
+  function exportReport() {
+    var text = buildReport();
+    var now = new Date().toISOString().slice(0, 10);
+    var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bizibox-orders-проверка-' + now + '.txt';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  function copyReport() {
+    var text = buildReport();
+    function done() { alert('Отчёт скопирован в буфер обмена.'); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); });
+    } else {
+      fallbackCopy(text);
+    }
+    function fallbackCopy(t) {
+      var ta = document.createElement('textarea');
+      ta.value = t;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); }
+      catch (e) { alert('Не удалось скопировать. Используйте «Скачать отчёт».'); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  function resetAll() {
+    if (!confirm('Сбросить все галочки и комментарии? Это действие необратимо.')) return;
+    state = { checked: {}, comments: {}, note: '' };
+    save();
+    render();
+  }
+
+  var saved = safeGet();
+  if (saved && saved.checked && saved.comments) state = saved;
+  render();
+})();
+</script>
+</body>
+</html>

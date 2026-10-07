@@ -1,0 +1,59 @@
+[project]
+name = "bizibox-backend"
+version = "2.1.0"
+description = "BiziBox backend application"
+requires-python = ">=3.13"
+
+# Целевая версия Python — 3.13 (единая для venv, CI, mypy, ruff, AGENTS.md).
+# numpy==2.5.1 имеет wheels под 3.13; navec==0.10.0 совместим с numpy 2.x (проверено).
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+ignore_missing_imports = true
+plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
+# Диагностические корневые скрипты (seed, _check_db, diag_send_code, seed_performance)
+# исключены: это одноразовые утилиты разработки, не продакшен-код (решение D3).
+exclude = [
+  "^_check_db\\.py$",
+  "^diag_send_code\\.py$",
+  "seed_performance\\.py$",
+]
+
+# Ослабление для тестов (решение D3): тестовые функции не требуют аннотаций возврата.
+# Фикстуры/хелперы живут в tests/, это не продакшен-код; строгие проверки типов
+# внутри тестов сохраняются (strict по-прежнему включён).
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_calls = false
+disallow_any_unimported = false
+
+# Внешние untyped-библиотеки (решение D3): подавление missing-import на уровне
+# пакета, вместо построчных `# type: ignore` в app/. Старые построчные подавления
+# удаляются в R1-06.
+[[tool.mypy.overrides]]
+module = [
+  "imap.*",
+  "smtp.*",
+  "pyrogram.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+# Неустранимые warnings сторонних библиотек (не наш код, требуют мажорного апгрейда пинов):
+#   - starlette/formparsers.py: PendingDeprecation "import multipart -> python_multipart"
+#   - pyrogram/sync.py: Deprecation "asyncio.get_event_loop()" без текущего loop
+#   - aiosqlite/core.py: Deprecation datetime-адаптер sqlite (Python 3.12+)
