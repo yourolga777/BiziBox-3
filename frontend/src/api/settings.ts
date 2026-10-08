@@ -41,6 +41,13 @@ export const settingsApi = {
   onboardingConfig: (login?: string) =>
     request<OnboardingData>(`/settings/onboarding-config${login ? `?login=${encodeURIComponent(login)}` : ''}`),
 
+  demo: () =>
+    request<{ onboarded: boolean; login?: string }>('/settings/demo', {
+      method: 'POST',
+      body: '{}',
+      _offlineEnqueue: false,
+    }),
+
   vpnHelp: (name: string) =>
     request<VpnHelpResult>(`/vpn-help?name=${encodeURIComponent(name)}`),
 

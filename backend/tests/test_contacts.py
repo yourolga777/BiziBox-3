@@ -272,6 +272,34 @@ async def test_folder_suppliers_creates_supplier():
 
 
 @pytest.mark.asyncio
+async def test_folder_subfolder_syncs_legacy_folder_id():
+    async with make_client() as client:
+        c = await client.post("/api/contacts/", json={"name": "Иван"})
+        cid = c.json()["id"]
+
+        folders = (await client.get("/api/folders/")).json()
+        parent = next(f for f in folders if f["category_key"] == "customers")
+
+        sub = await client.post(
+            "/api/folders/",
+            json={"name": "Подпапка", "sphere": "work", "parent_id": parent["id"]},
+        )
+        assert sub.status_code == 201
+        sub_id = sub.json()["id"]
+
+        response = await client.patch(
+            f"/api/contacts/{cid}",
+            json={"life_sphere": "work", "folder_ids": [sub_id]},
+        )
+        assert response.status_code == 200
+        data = response.json()
+
+        # legacy folder_id должен указывать на подпапку, чтобы фильтры находили контакт
+        assert data["folder_id"] == sub_id
+        assert sub_id in [f["id"] for f in data["folders"]]
+
+
+@pytest.mark.asyncio
 async def test_reset_classification_moves_contact_to_other():
     async with make_client() as client:
         created = await client.post("/api/contacts/", json={

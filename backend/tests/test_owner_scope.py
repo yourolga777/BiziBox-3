@@ -156,6 +156,7 @@ def test_all_owner_routers_declare_get_current_user():
             ("get", "/onboarding-status"),
             ("post", "/onboarding-complete"),
             ("post", "/auth/logout"),
+            ("post", "/demo"),
         },
     }
     found: dict[str, set[tuple[str, str]]] = {}

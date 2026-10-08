@@ -1,15 +1,17 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_session
 from ..deps import get_current_user
-from ..models import ContactModel, MessageModel, TaskModel, UserModel
+from ..models import ContactModel, MessageModel, OrderModel, TaskModel, UserModel
 from ..schemas.dashboard import (
     ChannelDistribution,
+    FunnelResponse,
+    FunnelStage,
     MetricsResponse,
     PulseAnimation,
     TopContact,
@@ -25,6 +27,59 @@ def invalidate_metrics_cache() -> None:
     """Сброс кэша метрик — вызывается при изменении статусов сообщений,
     чтобы badge «Входящие» обновлялся сразу, а не через CACHE_TTL."""
     _cache.clear()
+
+
+@router.get("/funnel", response_model=FunnelResponse)
+async def get_funnel(
+    period: str = Query("all", pattern=r"^(all|week|month)$"),
+    session: AsyncSession = Depends(get_session),
+    current_user: UserModel = Depends(get_current_user),
+) -> FunnelResponse:
+    owner_id = int(current_user.id)
+    now = datetime.now()
+    since: datetime | None = None
+    if period == "week":
+        since = now - timedelta(days=7)
+    elif period == "month":
+        since = now - timedelta(days=30)
+
+    stmt = (
+        select(
+            OrderModel.status,
+            func.count(OrderModel.id),
+            func.coalesce(func.sum(OrderModel.total), 0.0),
+        )
+        .where(OrderModel.owner_id == owner_id)
+        .where(OrderModel.deleted_at.is_(None))
+    )
+    if since is not None:
+        stmt = stmt.where(OrderModel.created_at >= since)
+    stmt = stmt.group_by(OrderModel.status)
+
+    rows = (await session.execute(stmt)).all()
+    by_status: dict[str, dict[str, Any]] = {
+        r[0]: {"count": int(r[1] or 0), "sum": float(r[2] or 0)} for r in rows
+    }
+
+    labels = {
+        "new": "Новый",
+        "in_progress": "В работе",
+        "shipped": "Отправлен",
+        "completed": "Завершён",
+        "cancelled": "Отменён",
+    }
+    stages = [
+        FunnelStage(
+            status=status,
+            label=labels[status],
+            count=by_status.get(status, {}).get("count", 0),
+            sum=by_status.get(status, {}).get("sum", 0.0),
+        )
+        for status in ("new", "in_progress", "shipped", "completed")
+    ]
+    cancelled = by_status.get("cancelled", {}).get("count", 0)
+
+    return FunnelResponse(stages=stages, cancelled=cancelled)
 
 
 @router.get("/metrics", response_model=MetricsResponse)
@@ -78,6 +133,13 @@ async def get_metrics(
         MessageModel.created_at >= today_start,
     )
     completed_tasks = await c(TaskModel, TaskModel.status == "completed")
+
+    total_orders = await c(OrderModel, OrderModel.deleted_at.is_(None))
+    active_orders = await c(
+        OrderModel,
+        OrderModel.deleted_at.is_(None),
+        OrderModel.status.notin_(["completed", "cancelled"]),
+    )
 
     # Контакты-«каналы»: сфера life_sphere == 'channels'.
     channel_contact_ids: set[int] = set()
@@ -230,6 +292,8 @@ async def get_metrics(
         new_tasks=new_tasks,
         messages_today_active=messages_today_active,
         active_tasks=active_tasks,
+        total_orders=total_orders,
+        active_orders=active_orders,
         channel_distribution=channel_distribution,
         top_contacts=top_contacts,
         last_activity=now.isoformat(),

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from app.database import _migrate_with_alembic
 
 STALE_REVISION = "d4e5f6a1b2c3"
-NEW_HEAD = "a2b3c4d5e6f7"
+NEW_HEAD = "a3b4c5d6e7f8"
 
 
 def _seed_stale_db(sync_url: str) -> None:

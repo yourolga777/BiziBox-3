@@ -152,6 +152,17 @@ class ChannelMessageService:
             return subject
         return f"Re: {subject}"
 
+    async def _ensure_can_send(self, channel: str) -> None:
+        """Блокирует отправку, если канал работает в режиме «только входящие»."""
+        from ..deps import get_poll_service
+
+        ps = get_poll_service()
+        if ps is not None and ps.get_channel_mode(channel) == "incoming_only":
+            raise HTTPException(
+                403,
+                f"Канал {channel} работает только на приём — отправка отключена",
+            )
+
     async def send_reply(
         self,
         message_id: int,
@@ -162,6 +173,8 @@ class ChannelMessageService:
         original = await self.message_repo.get_by_id(message_id)
         if not original:
             return None
+
+        await self._ensure_can_send(str(original.channel))
 
         outbox = OutboxService(self.session, owner_id=self.owner_id)
         if client_request_id:
@@ -251,6 +264,8 @@ class ChannelMessageService:
         original = await self.message_repo.get_by_id(message_id)
         if not original:
             return None
+
+        await self._ensure_can_send(str(original.channel))
 
         outbox = OutboxService(self.session, owner_id=self.owner_id)
         if client_request_id:
@@ -417,6 +432,7 @@ class ChannelMessageService:
         client_request_id: Optional[str] = None,
         recipient: Optional[str] = None,
     ) -> Optional[MessageResponse]:
+        await self._ensure_can_send(channel)
         outbox = OutboxService(self.session, owner_id=self.owner_id)
         if client_request_id:
             existing = await outbox.repo.get_by_client_request_id(client_request_id)
@@ -480,6 +496,7 @@ class ChannelMessageService:
         client_request_id: Optional[str] = None,
         recipient: Optional[str] = None,
     ) -> Optional[MessageResponse]:
+        await self._ensure_can_send(channel)
         outbox = OutboxService(self.session, owner_id=self.owner_id)
         if client_request_id:
             existing = await outbox.repo.get_by_client_request_id(client_request_id)
@@ -575,6 +592,7 @@ class ChannelMessageService:
         content: str,
         client_request_id: Optional[str] = None,
     ) -> MessageResponse:
+        await self._ensure_can_send(channel)
         adapter = self.channels.get(channel)
         if not adapter:
             raise HTTPException(503, f"Канал {channel} не подключён")

@@ -5,7 +5,7 @@ export { supplierApi } from './suppliers'
 export { messageApi, sendReply } from './messages'
 export { contactApi } from './contacts'
 export { channelApi } from './channels'
-export { fetchMetrics } from './dashboard'
+export { fetchMetrics, fetchFunnel } from './dashboard'
 
 const API_BASE = '/api'
 export const BIZIBOX_LOGIN_KEY = 'bizibox_login'

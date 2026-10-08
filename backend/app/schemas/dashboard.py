@@ -19,6 +19,18 @@ class TopContact(BaseModel):
     message_count: int
 
 
+class FunnelStage(BaseModel):
+    status: str
+    label: str
+    count: int
+    sum: float
+
+
+class FunnelResponse(BaseModel):
+    stages: list[FunnelStage]
+    cancelled: int
+
+
 class MetricsResponse(BaseModel):
     total_messages_today: int
     total_tasks_today: int
@@ -37,6 +49,8 @@ class MetricsResponse(BaseModel):
     new_tasks: int = 0
     messages_today_active: int = 0
     active_tasks: int = 0
+    total_orders: int = 0
+    active_orders: int = 0
     channel_distribution: list[ChannelDistribution] = []
     top_contacts: list[TopContact] = []
     last_activity: str

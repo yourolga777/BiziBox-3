@@ -119,6 +119,7 @@ class ChannelService:
 
         if ps:
             ps.register_channel("telegram", adapter)
+            ps.set_channel_mode("telegram", getattr(channel, "mode", "both") or "both")
             interval = await get_poll_interval(
                 self.session,
                 "telegram_poll_interval",
@@ -191,6 +192,9 @@ class ChannelService:
                         )
                         if connected_ok:
                             poll_service.register_channel("telegram", adapter)
+                            poll_service.set_channel_mode(
+                                "telegram", getattr(channel, "mode", "both") or "both"
+                            )
                             poll_service.start(
                                 "telegram",
                                 int(tg_interval),
@@ -212,6 +216,9 @@ class ChannelService:
                         )
                         if connected_ok:
                             poll_service.register_channel("email", adapter)
+                            poll_service.set_channel_mode(
+                                "email", getattr(channel, "mode", "both") or "both"
+                            )
                             poll_service.start(
                                 "email",
                                 int(email_interval),
@@ -230,6 +237,9 @@ class ChannelService:
                         )
                         if connected_ok:
                             poll_service.register_channel("vk", adapter)
+                            poll_service.set_channel_mode(
+                                "vk", getattr(channel, "mode", "both") or "both"
+                            )
                             poll_service.start(
                                 "vk",
                                 int(vk_interval),
@@ -350,6 +360,9 @@ class ChannelService:
             if adapter is None:
                 continue
             poll_service.register_channel(channel.type, adapter)
+            poll_service.set_channel_mode(
+                channel.type, getattr(channel, "mode", "both") or "both"
+            )
             interval = await self._poll_interval(channel.type)
             poll_service.start(channel.type, interval, since=channel.last_polled_at)
             await self.repo.update(channel.id, is_connected=True)

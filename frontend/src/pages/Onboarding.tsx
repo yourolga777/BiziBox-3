@@ -64,6 +64,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(0)
   const [data, setData] = useState<StepData>(defaultData)
   const [saving, setSaving] = useState(false)
+  const [demoLoading, setDemoLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [apiExpanded, setApiExpanded] = useState(false)
   const prefilledLoginRef = useRef<string | null>(null)
@@ -221,6 +222,25 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     }
   }
 
+  const handleDemo = async () => {
+    if (demoLoading) return
+    setDemoLoading(true)
+    setError(null)
+    try {
+      const result = await settingsApi.demo()
+      if (result.login) {
+        setStoredLogin(result.login)
+      }
+      markLocalOnboarded()
+      clearProgress()
+      localStorage.removeItem('BIZIBOX_RQ_CACHE')
+      onComplete()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка загрузки демо')
+      setDemoLoading(false)
+    }
+  }
+
   const steps = [
     { icon: MessageSquare, label: 'Telegram', color: 'bg-blue-500' },
     { icon: Globe, label: 'Email', color: 'bg-green-500' },
@@ -339,6 +359,16 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               )}
             </div>
           </div>
+
+          {step === 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+              <p className="text-sm text-gray-500 mb-2">Не хотите настраивать сейчас?</p>
+              <Button variant="ghost" onClick={handleDemo} disabled={demoLoading} className="w-full">
+                {demoLoading ? 'Загрузка демо...' : 'Попробовать демо с примерами данных'}
+              </Button>
+              {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+            </div>
+          )}
         </div>
       </div>
     </div>

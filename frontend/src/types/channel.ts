@@ -1,8 +1,19 @@
+export type ChannelMode = 'both' | 'incoming_only' | 'outgoing_only'
+
+export const CHANNEL_MODES: ChannelMode[] = ['both', 'incoming_only', 'outgoing_only']
+
+export const CHANNEL_MODE_LABELS: Record<ChannelMode, string> = {
+  both: 'Оба направления',
+  incoming_only: 'Только входящие',
+  outgoing_only: 'Только исходящие',
+}
+
 export interface Channel {
   id: number
   type: string
   name: string
   is_connected: boolean
+  mode: ChannelMode
   last_polled_at: string | null
   created_at: string | null
   updated_at: string | null

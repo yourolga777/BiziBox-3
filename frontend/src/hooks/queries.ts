@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { channelApi, contactApi, messageApi, taskApi, fetchMetrics, isOfflineError, requestOptimistic } from '../api/client'
+import { channelApi, contactApi, messageApi, taskApi, fetchMetrics, fetchFunnel, isOfflineError, requestOptimistic } from '../api/client'
 import { reminderApi } from '../api/reminders'
 import { saveMessages, getMessagesFromCache, getMessageFromCache } from '../offline/db'
 import { saveContacts, getContactsFromCache, getContactFromCache } from '../offline/db'
@@ -416,6 +416,13 @@ export function useDashboardMetricsQuery(refetchInterval?: number) {
     queryKey: ['dashboard', 'metrics'],
     queryFn: fetchMetrics,
     refetchInterval,
+  })
+}
+
+export function useDashboardFunnelQuery(period: string = 'all') {
+  return useQuery({
+    queryKey: ['dashboard', 'funnel', period],
+    queryFn: () => fetchFunnel(period),
   })
 }
 

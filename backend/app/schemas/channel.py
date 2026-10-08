@@ -53,11 +53,16 @@ class ChannelResponse(BaseModel):
     type: str
     name: str
     is_connected: bool
+    mode: str = "both"
     last_polled_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
+
+
+class ChannelModeUpdate(BaseModel):
+    mode: str = Field(..., pattern=r"^(both|incoming_only|outgoing_only)$")
 
 
 class ChannelSendReply(BaseModel):

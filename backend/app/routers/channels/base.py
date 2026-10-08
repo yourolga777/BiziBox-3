@@ -11,7 +11,7 @@ from ...channels.base import ChannelFetchTimeoutError
 from ...database import get_session
 from ...deps import get_poll_service
 from ...repositories.channel import ChannelRepository
-from ...schemas.channel import ChannelResponse, DownloadResponse
+from ...schemas.channel import ChannelModeUpdate, ChannelResponse, DownloadResponse
 from ...services.channel_message_service import ChannelMessageService
 from .auth import _pending_auths
 from .telegram_debug import router as telegram_debug_router
@@ -91,6 +91,27 @@ async def get_channel(
     if not channel:
         raise HTTPException(status_code=404, detail="Channel not found")
     return ChannelResponse.model_validate(channel)
+
+
+@router.patch("/{channel_id}/mode", response_model=ChannelResponse)
+async def update_channel_mode(
+    channel_id: int,
+    data: ChannelModeUpdate,
+    session: AsyncSession = Depends(get_session),
+) -> ChannelResponse:
+    repo = ChannelRepository(session)
+    channel = await repo.get_by_id(channel_id)
+    if not channel:
+        raise HTTPException(status_code=404, detail="Channel not found")
+
+    await repo.update(channel_id, mode=data.mode)
+
+    ps = get_poll_service()
+    if ps:
+        ps.set_channel_mode(channel.type, data.mode)
+
+    fresh = await repo.get_by_id(channel_id)
+    return ChannelResponse.model_validate(fresh)
 
 
 @router.get("/{channel_id}/health")

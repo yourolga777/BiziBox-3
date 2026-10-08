@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from 'react'
-import { AlertCircle, RefreshCw, TrendingUp, TrendingDown, Mail, ListTodo, CircleCheck, MessageSquareText } from 'lucide-react'
+import { AlertCircle, RefreshCw, TrendingUp, TrendingDown, Mail, ListTodo, CircleCheck, MessageSquareText, HelpCircle, Package } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Card from '../common/Card'
 import { useDashboardMetricsQuery } from '../../hooks/queries'
@@ -44,6 +44,20 @@ const MetricCard = memo(function MetricCard({ icon: Icon, label, value, yesterda
     </Link>
   )
 })
+
+function PlaceholderTile({ icon: Icon, label }: { icon: typeof Mail; label: string }) {
+  return (
+    <div className="bg-white rounded-xl border border-dashed border-gray-300 p-4 flex items-center gap-3 opacity-70">
+      <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-gray-100">
+        <Icon size={20} className="text-gray-400" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-gray-400 uppercase tracking-wide">{label}</p>
+        <p className="text-sm font-medium text-gray-400">Будет позже</p>
+      </div>
+    </div>
+  )
+}
 
 const ACHIEVEMENT_CYCLES = [
   { key: 'answered', label: 'Отвечено', icon: MessageSquareText, color: '#6366f1', getValue: (d: MetricsResponse) => d.answered_messages },
@@ -142,7 +156,7 @@ function PulseWidget() {
 
   if (error) {
     return (
-      <Card title="Пульс" className="flex-1">
+      <Card title="Пульс бизнеса" className="flex-1">
         <div className="flex flex-col items-center gap-3 py-6 text-center">
           <AlertCircle className="text-red-500" size={32} />
           <p className="text-gray-600">{error instanceof Error ? error.message : 'Ошибка загрузки'}</p>
@@ -176,12 +190,13 @@ function PulseWidget() {
 
   const items: MetricCardProps[] = [
     { icon: Mail, label: 'Сообщения', value: data.messages_today_active, yesterday: data.messages_yesterday, total: data.total_messages, color: '#6366f1', linkTo: '/inbox' },
+    { icon: Package, label: 'Заказы', value: data.active_orders, yesterday: 0, total: data.total_orders, color: '#10b981', linkTo: '/orders', subtitle: 'активные', hideTrend: true },
     { icon: ListTodo, label: 'Задачи', value: data.active_tasks, yesterday: 0, total: data.total_tasks, color: '#f59e0b', linkTo: '/tasks', subtitle: 'не завершено', hideTrend: true },
   ]
 
   return (
     <Card className="flex-1">
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">Пульс</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">Пульс бизнеса</h3>
       <div className="flex flex-col xl:flex-row items-stretch xl:items-start gap-4">
         <div className="flex flex-col items-center gap-2 shrink-0 xl:w-24">
           <PulseCircle value={pValue} color={pCycle.color} pulseDuration={pulseDuration} />
@@ -192,9 +207,10 @@ function PulseWidget() {
           <p className="text-[11px] text-gray-400">за сегодня</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 min-w-0">
-          {items.map((item) => (
-            <MetricCard key={item.label} {...item} />
-          ))}
+          <MetricCard {...items[0]} />
+          <PlaceholderTile icon={HelpCircle} label="Вопросы" />
+          <MetricCard {...items[1]} />
+          <MetricCard {...items[2]} />
         </div>
         <div className="flex flex-col items-center gap-2 shrink-0 xl:w-24">
           <PulseCircle value={aValue} color={aCycle.color} pulseDuration={pulseDuration} />

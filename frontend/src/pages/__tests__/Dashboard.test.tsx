@@ -25,6 +25,7 @@ const EMPTY_METRICS = {
   total_messages: 0, total_tasks: 0, total_contacts: 0,
   messages_yesterday: 0, tasks_yesterday: 0, contacts_yesterday: 0,
   unread_messages: 0, unread_chats: 0, answered_messages: 0, completed_tasks: 0,
+  total_orders: 0, active_orders: 0,
   channel_distribution: [], top_contacts: [],
   last_activity: new Date().toISOString(), last_updated: new Date().toISOString(),
   pulse_animation: { type: 'balanced', intensity: 0.5 },
@@ -46,7 +47,7 @@ describe('Dashboard page', () => {
 
   it('показывает дашборд с нулевыми данными (без welcome-заглушки)', async () => {
     render(<Dashboard />, { wrapper: createWrapper() });
-    expect(await screen.findByText('Пульс')).toBeInTheDocument();
+    expect(await screen.findByText('Пульс бизнеса')).toBeInTheDocument();
     expect(screen.getByText('Сегодня')).toBeInTheDocument();
     expect(screen.getByText('Просроченное')).toBeInTheDocument();
     expect(screen.getAllByText('Непрочитанные').length).toBeGreaterThan(0);
@@ -61,7 +62,7 @@ describe('Dashboard page', () => {
     );
     render(<Dashboard />, { wrapper: createWrapper() });
 
-    expect(await screen.findByText('Пульс')).toBeInTheDocument();
+    expect(await screen.findByText('Пульс бизнеса')).toBeInTheDocument();
     expect(screen.getByText('Сегодня')).toBeInTheDocument();
     expect(screen.getByText('Просроченное')).toBeInTheDocument();
     expect(screen.getAllByText('Непрочитанные').length).toBeGreaterThan(0);

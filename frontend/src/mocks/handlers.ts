@@ -20,6 +20,8 @@ export const handlers = [
       new_tasks: 8,
       messages_today_active: 42,
       active_tasks: 12,
+      total_orders: 24,
+      active_orders: 7,
       channel_distribution: [
         { channel: 'telegram', count: 40 },
         { channel: 'email', count: 16 },
@@ -31,6 +33,18 @@ export const handlers = [
       last_activity: new Date().toISOString(),
       last_updated: new Date().toISOString(),
       pulse_animation: { type: 'balanced', intensity: 0.6 },
+    }),
+  ),
+
+  http.get('/api/dashboard/funnel', () =>
+    HttpResponse.json({
+      stages: [
+        { status: 'new', label: 'Новый', count: 5, sum: 120000 },
+        { status: 'in_progress', label: 'В работе', count: 3, sum: 80000 },
+        { status: 'shipped', label: 'Отправлен', count: 2, sum: 55000 },
+        { status: 'completed', label: 'Завершён', count: 1, sum: 30000 },
+      ],
+      cancelled: 1,
     }),
   ),
 

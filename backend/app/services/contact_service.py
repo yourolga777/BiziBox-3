@@ -126,6 +126,29 @@ class ContactService:
             stack.extend(children.get(cur, []))
         return result
 
+    async def _primary_folder_id(self, folder_ids: list[int]) -> Optional[int]:
+        """Возвращает самую глубокую папку из выбранных (для legacy folder_id)."""
+        if not folder_ids:
+            return None
+        rows = await self.session.execute(
+            select(ContactFolderModel.id, ContactFolderModel.parent_id)
+        )
+        parent: dict[int, Optional[int]] = {}
+        for fid, pid in rows.all():
+            parent[int(fid)] = int(pid) if pid is not None else None
+
+        def depth(fid: int) -> int:
+            d = 0
+            seen: set[int] = set()
+            cur: Optional[int] = fid
+            while cur is not None and cur not in seen:
+                seen.add(cur)
+                cur = parent.get(cur)
+                d += 1
+            return d
+
+        return max(folder_ids, key=depth)
+
     async def get_deleted(
         self, skip: int = 0, limit: int = 100
     ) -> List[ContactResponse]:
@@ -255,6 +278,11 @@ class ContactService:
                 existing_ids = [int(t) for t in existing_rows.scalars().all()]
                 merged = list(dict.fromkeys([*existing_ids, *auto_ids]))
                 await self.contact_repo.set_contact_types(contact_id, merged)
+        # Синхронизируем legacy-поле folder_id с самой глубокой выбранной папкой,
+        # чтобы фильтры (Входящие/Контакты) находили контакт и в родительской
+        # папке, и в подпапке.
+        primary = await self._primary_folder_id(folder_ids)
+        await self.contact_repo.update(contact_id, folder_id=primary)
         await self.session.flush()
 
     async def set_spam(self, contact_id: int, spam: bool) -> Optional[ContactResponse]:

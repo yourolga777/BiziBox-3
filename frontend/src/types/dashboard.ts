@@ -21,9 +21,23 @@ export interface MetricsResponse {
   new_tasks: number
   messages_today_active: number
   active_tasks: number
+  total_orders: number
+  active_orders: number
   channel_distribution: { channel: string; count: number }[]
   top_contacts: { contact_id: number; contact_name: string | null; message_count: number }[]
   last_activity: string
   last_updated: string
   pulse_animation: PulseAnimation
+}
+
+export interface FunnelStage {
+  status: string
+  label: string
+  count: number
+  sum: number
+}
+
+export interface FunnelResponse {
+  stages: FunnelStage[]
+  cancelled: number
 }

@@ -17,6 +17,7 @@ import Card from '../components/common/Card'
 import PulseWidget from '../components/dashboard/PulseWidget'
 import TasksBoard from '../components/dashboard/TasksBoard'
 import OrdersBoard from '../components/dashboard/OrdersBoard'
+import SalesFunnel from '../components/dashboard/SalesFunnel'
 import TaskCreateModal from '../components/tasks/TaskCreateModal'
 import { CalendarModal } from '../components/calendar/CalendarModal'
 import ContactForm, { toNullableString } from '../components/contacts/ContactForm'
@@ -358,6 +359,8 @@ function Dashboard() {
           <TasksBoard />
 
           <OrdersBoard />
+
+          <SalesFunnel />
         </div>
 
         <div className="space-y-4">

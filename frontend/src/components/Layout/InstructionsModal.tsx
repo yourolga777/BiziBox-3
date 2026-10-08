@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Dialog } from '@headlessui/react'
-import { Search, X, LayoutDashboard, Inbox, Users, Calendar, ListTodo, Radio, Archive, Settings, WifiOff, HelpCircle } from 'lucide-react'
+import { Search, X, LayoutDashboard, Inbox, Users, Calendar, ListTodo, Radio, Archive, Settings, WifiOff, HelpCircle, Package, ShoppingCart } from 'lucide-react'
 import { instructions, type InstructionItem } from '../../data/instructions'
 import type { LucideIcon } from 'lucide-react'
 
@@ -15,6 +15,8 @@ const iconMap: Record<string, LucideIcon> = {
   Settings,
   WifiOff,
   HelpCircle,
+  Package,
+  ShoppingCart,
 }
 
 interface InstructionsModalProps {

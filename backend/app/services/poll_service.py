@@ -22,6 +22,7 @@ class PollService:
         self.channels: Dict[str, BaseChannelAdapter] = {}
         self.tasks: Dict[str, asyncio.Task[Any]] = {}
         self.last_poll: Dict[str, Optional[datetime]] = {}
+        self.channel_modes: Dict[str, str] = {}
         self._session_factory = session_factory
         self._cms_factory = cms_factory
 
@@ -35,6 +36,12 @@ class PollService:
 
     def register_channel(self, channel_type: str, adapter: BaseChannelAdapter) -> None:
         self.channels[channel_type] = adapter
+
+    def set_channel_mode(self, channel_type: str, mode: str) -> None:
+        self.channel_modes[channel_type] = mode
+
+    def get_channel_mode(self, channel_type: str) -> str:
+        return self.channel_modes.get(channel_type, "both")
 
     def get_channel(self, channel_type: str) -> Optional[BaseChannelAdapter]:
         return self.channels.get(channel_type)
@@ -56,6 +63,12 @@ class PollService:
                             self.last_poll.get(channel_type),
                         )
                         break
+
+                    if self.get_channel_mode(channel_type) == "outgoing_only":
+                        # Канал в режиме «только исходящие» — входящие не читаем,
+                        # но адаптер остаётся подключённым для отправки.
+                        await asyncio.sleep(interval)
+                        continue
 
                     since = self.last_poll.get(channel_type)
 

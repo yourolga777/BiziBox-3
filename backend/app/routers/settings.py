@@ -322,6 +322,13 @@ async def reset_onboarding(
     return {"onboarded": False}
 
 
+@router.post("/demo")
+async def create_demo() -> dict[str, Any]:
+    from ..services.demo_service import activate_demo
+
+    return await activate_demo()
+
+
 @router.post("/auth/logout")
 async def logout() -> dict[str, Any]:
     from ..deps import get_poll_service

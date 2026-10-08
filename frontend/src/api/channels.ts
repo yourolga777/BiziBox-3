@@ -1,10 +1,17 @@
-import type { Channel, ChannelHealth, DownloadResponse, EmailConnectRequest, TelegramConfirmRequest, TelegramConfirmResponse, TelegramConnectRequest, TelegramConnectResponse, TelegramPasswordRequest, TelegramResendRequest, TelegramResendResponse, VkConnectRequest } from '../types/channel'
+import type { Channel, ChannelHealth, ChannelMode, DownloadResponse, EmailConnectRequest, TelegramConfirmRequest, TelegramConfirmResponse, TelegramConnectRequest, TelegramConnectResponse, TelegramPasswordRequest, TelegramResendRequest, TelegramResendResponse, VkConnectRequest } from '../types/channel'
 import { request } from './client'
 
 export const channelApi = {
   getAll: () => request<Channel[]>('/channels'),
 
   getById: (id: number) => request<Channel>(`/channels/${id}`),
+
+  updateMode: (id: number, mode: ChannelMode) =>
+    request<Channel>(`/channels/${id}/mode`, {
+      method: 'PATCH',
+      body: JSON.stringify({ mode }),
+      _offlineEnqueue: false,
+    }),
 
   health: (id: number) => request<ChannelHealth>(`/channels/${id}/health`),
 
